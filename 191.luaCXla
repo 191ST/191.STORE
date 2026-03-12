@@ -185,7 +185,7 @@ MSLoopContent.Visible = false
 MSLoopContent.ScrollBarThickness = 6
 MSLoopContent.CanvasSize = UDim2.new(0,0,0,400)
 
--- Auto Buy Tab Content (DIPERBAIKI)
+-- Auto Buy Tab Content
 local AutoBuyContent = Instance.new("ScrollingFrame")
 AutoBuyContent.Parent = Content
 AutoBuyContent.Size = UDim2.new(1,0,1,0)
@@ -383,7 +383,7 @@ local MSLoopStopCorner = Instance.new("UICorner")
 MSLoopStopCorner.Parent = MSLoopStopBtn
 MSLoopStopCorner.CornerRadius = UDim.new(0,8)
 
--- AUTO BUY CONTENT (DIPERBAIKI)
+-- AUTO BUY CONTENT (DENGAN TEXT CARA PAKAI BARU)
 local AutoBuyTitle = Instance.new("TextLabel")
 AutoBuyTitle.Parent = AutoBuyContent
 AutoBuyTitle.Size = UDim2.new(1,-20,0,30)
@@ -395,14 +395,14 @@ AutoBuyTitle.TextXAlignment = Enum.TextXAlignment.Left
 AutoBuyTitle.Font = Enum.Font.GothamBold
 AutoBuyTitle.TextSize = 16
 
--- Info dengan petunjuk jelas
+-- Info dengan teks baru (PUTIH)
 local AutoBuyInfo = Instance.new("TextLabel")
 AutoBuyInfo.Parent = AutoBuyContent
-AutoBuyInfo.Size = UDim2.new(1,-20,0,50)
+AutoBuyInfo.Size = UDim2.new(1,-20,0,40)
 AutoBuyInfo.Position = UDim2.new(0,10,0,45)
 AutoBuyInfo.BackgroundColor3 = Color3.fromRGB(50,50,60)
-AutoBuyInfo.Text = "📌 CARA PAKAI:\n1. Buka STORE / SHOP di game\n2. Pastikan button BUY terlihat\n3. Klik TEST BUTTON dulu\n4. Klik START BUY"
-AutoBuyInfo.TextColor3 = Color3.fromRGB(255,255,100)
+AutoBuyInfo.Text = "📌cara pakai: test button dulu kalo lau kaga nemu berarti gabisa kalo nemu tinggal lau start aja"
+AutoBuyInfo.TextColor3 = Color3.fromRGB(255,255,255) -- PUTIH
 AutoBuyInfo.Font = Enum.Font.Gotham
 AutoBuyInfo.TextSize = 12
 AutoBuyInfo.TextWrapped = true
@@ -416,7 +416,7 @@ AutoBuyInfoCorner.CornerRadius = UDim.new(0,6)
 local AutoBuyStatus = Instance.new("TextLabel")
 AutoBuyStatus.Parent = AutoBuyContent
 AutoBuyStatus.Size = UDim2.new(1,-20,0,30)
-AutoBuyStatus.Position = UDim2.new(0,10,0,100)
+AutoBuyStatus.Position = UDim2.new(0,10,0,90)
 AutoBuyStatus.BackgroundColor3 = Color3.fromRGB(40,40,50)
 AutoBuyStatus.Text = "⏹️ STOPPED"
 AutoBuyStatus.TextColor3 = Color3.fromRGB(255,100,100)
@@ -431,7 +431,7 @@ AutoBuyStatusCorner.CornerRadius = UDim.new(0,6)
 local OrderStatus = Instance.new("TextLabel")
 OrderStatus.Parent = AutoBuyContent
 OrderStatus.Size = UDim2.new(1,-20,0,25)
-OrderStatus.Position = UDim2.new(0,10,0,135)
+OrderStatus.Position = UDim2.new(0,10,0,125)
 OrderStatus.BackgroundColor3 = Color3.fromRGB(40,40,50)
 OrderStatus.Text = "⏳ Menunggu START..."
 OrderStatus.TextColor3 = Color3.fromRGB(200,200,200)
@@ -446,7 +446,7 @@ OrderStatusCorner.CornerRadius = UDim.new(0,6)
 local SliderBg = Instance.new("Frame")
 SliderBg.Parent = AutoBuyContent
 SliderBg.Size = UDim2.new(1,-40,0,50)
-SliderBg.Position = UDim2.new(0,20,0,170)
+SliderBg.Position = UDim2.new(0,20,0,160)
 SliderBg.BackgroundColor3 = Color3.fromRGB(40,40,50)
 SliderBg.BorderSizePixel = 0
 
@@ -454,23 +454,23 @@ local SliderBgCorner = Instance.new("UICorner")
 SliderBgCorner.Parent = SliderBg
 SliderBgCorner.CornerRadius = UDim.new(0,8)
 
--- Slider Fill
+-- Slider Fill (PUTIH)
 local SliderFill = Instance.new("Frame")
 SliderFill.Parent = SliderBg
 SliderFill.Size = UDim2.new(0.5,0,1,0)
-SliderFill.BackgroundColor3 = Color3.fromRGB(100,255,255) -- CYAN
+SliderFill.BackgroundColor3 = Color3.fromRGB(255,255,255) -- PUTIH
 SliderFill.BorderSizePixel = 0
 
 local SliderFillCorner = Instance.new("UICorner")
 SliderFillCorner.Parent = SliderFill
 SliderFillCorner.CornerRadius = UDim.new(0,8)
 
--- Slider Button
+-- Slider Button (PUTIH)
 local SliderButton = Instance.new("TextButton")
 SliderButton.Parent = SliderBg
 SliderButton.Size = UDim2.new(0,20,0,20)
 SliderButton.Position = UDim2.new(0.5,-10,0.5,-10)
-SliderButton.BackgroundColor3 = Color3.fromRGB(100,255,255) -- CYAN
+SliderButton.BackgroundColor3 = Color3.fromRGB(255,255,255) -- PUTIH
 SliderButton.Text = ""
 SliderButton.ZIndex = 2
 
@@ -482,7 +482,7 @@ SliderButtonCorner.CornerRadius = UDim.new(1,0)
 local SliderValue = Instance.new("TextLabel")
 SliderValue.Parent = AutoBuyContent
 SliderValue.Size = UDim2.new(1,-40,0,25)
-SliderValue.Position = UDim2.new(0,20,0,225)
+SliderValue.Position = UDim2.new(0,20,0,215)
 SliderValue.BackgroundTransparency = 1
 SliderValue.Text = "Target: 50 (Total 150 items)"
 SliderValue.TextColor3 = Color3.fromRGB(255,255,255)
@@ -494,8 +494,8 @@ SliderValue.TextSize = 14
 local WaterProgress = Instance.new("TextLabel")
 WaterProgress.Parent = AutoBuyContent
 WaterProgress.Size = UDim2.new(0.3,-10,0,25)
-WaterProgress.Position = UDim2.new(0,15,0,260)
-WaterProgress.BackgroundColor3 = Color3.fromRGB(0,150,150) -- CYAN gelap
+WaterProgress.Position = UDim2.new(0,15,0,250)
+WaterProgress.BackgroundColor3 = Color3.fromRGB(0,150,150)
 WaterProgress.Text = "💧 WATER: 0"
 WaterProgress.TextColor3 = Color3.fromRGB(255,255,255)
 WaterProgress.Font = Enum.Font.GothamBold
@@ -508,8 +508,8 @@ WaterCorner.CornerRadius = UDim.new(0,6)
 local SugarProgress = Instance.new("TextLabel")
 SugarProgress.Parent = AutoBuyContent
 SugarProgress.Size = UDim2.new(0.3,-10,0,25)
-SugarProgress.Position = UDim2.new(0.35,0,0,260)
-SugarProgress.BackgroundColor3 = Color3.fromRGB(0,150,150) -- CYAN gelap
+SugarProgress.Position = UDim2.new(0.35,0,0,250)
+SugarProgress.BackgroundColor3 = Color3.fromRGB(0,150,150)
 SugarProgress.Text = "🍬 SUGAR: 0"
 SugarProgress.TextColor3 = Color3.fromRGB(255,255,255)
 SugarProgress.Font = Enum.Font.GothamBold
@@ -522,8 +522,8 @@ SugarCorner.CornerRadius = UDim.new(0,6)
 local GelatinProgress = Instance.new("TextLabel")
 GelatinProgress.Parent = AutoBuyContent
 GelatinProgress.Size = UDim2.new(0.3,-10,0,25)
-GelatinProgress.Position = UDim2.new(0.7,0,0,260)
-GelatinProgress.BackgroundColor3 = Color3.fromRGB(0,150,150) -- CYAN gelap
+GelatinProgress.Position = UDim2.new(0.7,0,0,250)
+GelatinProgress.BackgroundColor3 = Color3.fromRGB(0,150,150)
 GelatinProgress.Text = "🧪 GELATIN: 0"
 GelatinProgress.TextColor3 = Color3.fromRGB(255,255,255)
 GelatinProgress.Font = Enum.Font.GothamBold
@@ -537,7 +537,7 @@ GelatinCorner.CornerRadius = UDim.new(0,6)
 local TotalProgress = Instance.new("TextLabel")
 TotalProgress.Parent = AutoBuyContent
 TotalProgress.Size = UDim2.new(1,-20,0,25)
-TotalProgress.Position = UDim2.new(0,10,0,295)
+TotalProgress.Position = UDim2.new(0,10,0,285)
 TotalProgress.BackgroundColor3 = Color3.fromRGB(40,40,50)
 TotalProgress.Text = "Total: 0/150 items (0%)"
 TotalProgress.TextColor3 = Color3.fromRGB(200,200,200)
@@ -552,10 +552,10 @@ TotalProgressCorner.CornerRadius = UDim.new(0,6)
 local ButtonFrame = Instance.new("Frame")
 ButtonFrame.Parent = AutoBuyContent
 ButtonFrame.Size = UDim2.new(1,-20,0,45)
-ButtonFrame.Position = UDim2.new(0,10,0,330)
+ButtonFrame.Position = UDim2.new(0,10,0,320)
 ButtonFrame.BackgroundTransparency = 1
 
--- Test Button (PENTING: Test dulu sebelum start)
+-- Test Button
 local TestButton = Instance.new("TextButton")
 TestButton.Parent = ButtonFrame
 TestButton.Size = UDim2.new(0.3,-5,1,0)
@@ -604,7 +604,7 @@ StopBuyBtnCorner.CornerRadius = UDim.new(0,8)
 local DebugInfo = Instance.new("TextLabel")
 DebugInfo.Parent = AutoBuyContent
 DebugInfo.Size = UDim2.new(1,-20,0,40)
-DebugInfo.Position = UDim2.new(0,10,0,380)
+DebugInfo.Position = UDim2.new(0,10,0,370)
 DebugInfo.BackgroundColor3 = Color3.fromRGB(30,30,40)
 DebugInfo.Text = "Debug: Belum ada aktivitas"
 DebugInfo.TextColor3 = Color3.fromRGB(150,150,150)
@@ -686,7 +686,7 @@ function pressE()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
 end
 
--- IMPROVED: Function to find and click buy button dengan debug
+-- Function to find and click buy button
 function findAndClickBuyButton(itemName)
     DebugInfo.Text = "Debug: Mencari button " .. itemName .. "..."
     
@@ -913,7 +913,7 @@ function startMSLoop()
     ToolStatus.Text = "Tool: -"
 end
 
--- Auto Buy Function (SEQUENTIAL)
+-- Auto Buy Function
 function startAutoBuy()
     if autoBuyRunning then 
         OrderStatus.Text = "⚠️ Auto Buy sudah berjalan!"
@@ -932,7 +932,6 @@ function startAutoBuy()
     OrderStatus.Text = "🔄 Memulai AUTO BUY..."
     OrderStatus.TextColor3 = Color3.fromRGB(100,255,255)
     
-    -- Loop utama auto buy
     while autoBuyRunning and (waterCount < targetAmount or sugarCount < targetAmount or gelatinCount < targetAmount) do
         -- BELI WATER
         if autoBuyRunning and waterCount < targetAmount then
@@ -983,7 +982,6 @@ function startAutoBuy()
             end
         end
         
-        -- Update cycle info
         if autoBuyRunning then
             currentCycle = currentCycle + 1
             OrderStatus.Text = string.format("✅ Cycle %d - Progress: %d/%d", 
@@ -992,7 +990,6 @@ function startAutoBuy()
         end
     end
     
-    -- Selesai
     autoBuyRunning = false
     AutoBuyStatus.Text = "⏹️ STOPPED"
     AutoBuyStatus.TextColor3 = Color3.fromRGB(255,100,100)
@@ -1017,7 +1014,7 @@ function stopAutoBuy()
     end
 end
 
--- Test function yang lebih baik
+-- Test function
 function testAutoBuy()
     OrderStatus.Text = "🔍 Testing button WATER..."
     OrderStatus.TextColor3 = Color3.fromRGB(255,255,0)
