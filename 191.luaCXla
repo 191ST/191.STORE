@@ -185,14 +185,14 @@ MSLoopContent.Visible = false
 MSLoopContent.ScrollBarThickness = 6
 MSLoopContent.CanvasSize = UDim2.new(0,0,0,400)
 
--- Auto Buy Tab Content
+-- Auto Buy Tab Content (DIPERBAIKI)
 local AutoBuyContent = Instance.new("ScrollingFrame")
 AutoBuyContent.Parent = Content
 AutoBuyContent.Size = UDim2.new(1,0,1,0)
 AutoBuyContent.BackgroundTransparency = 1
 AutoBuyContent.Visible = false
 AutoBuyContent.ScrollBarThickness = 6
-AutoBuyContent.CanvasSize = UDim2.new(0,0,0,450)
+AutoBuyContent.CanvasSize = UDim2.new(0,0,0,500)
 
 -- TP Buttons
 local BtnBahan = Instance.new("TextButton")
@@ -283,7 +283,7 @@ RSDesc.TextXAlignment = Enum.TextXAlignment.Left
 RSDesc.Font = Enum.Font.Gotham
 RSDesc.TextSize = 12
 
--- MS LOOP CONTENT (DENGAN JEDA 3 DETIK)
+-- MS LOOP CONTENT
 local MSLoopTitle = Instance.new("TextLabel")
 MSLoopTitle.Parent = MSLoopContent
 MSLoopTitle.Size = UDim2.new(1,-20,0,30)
@@ -383,7 +383,7 @@ local MSLoopStopCorner = Instance.new("UICorner")
 MSLoopStopCorner.Parent = MSLoopStopBtn
 MSLoopStopCorner.CornerRadius = UDim.new(0,8)
 
--- AUTO BUY CONTENT
+-- AUTO BUY CONTENT (DIPERBAIKI)
 local AutoBuyTitle = Instance.new("TextLabel")
 AutoBuyTitle.Parent = AutoBuyContent
 AutoBuyTitle.Size = UDim2.new(1,-20,0,30)
@@ -395,27 +395,43 @@ AutoBuyTitle.TextXAlignment = Enum.TextXAlignment.Left
 AutoBuyTitle.Font = Enum.Font.GothamBold
 AutoBuyTitle.TextSize = 16
 
--- Info
+-- Info dengan petunjuk jelas
 local AutoBuyInfo = Instance.new("TextLabel")
 AutoBuyInfo.Parent = AutoBuyContent
-AutoBuyInfo.Size = UDim2.new(1,-20,0,40)
+AutoBuyInfo.Size = UDim2.new(1,-20,0,50)
 AutoBuyInfo.Position = UDim2.new(0,10,0,45)
 AutoBuyInfo.BackgroundColor3 = Color3.fromRGB(50,50,60)
-AutoBuyInfo.Text = "ℹ️ Beli berurutan: WATER → SUGAR BLOCK BAG → GELATIN, repeat sampai target"
-AutoBuyInfo.TextColor3 = Color3.fromRGB(100,255,255) -- CYAN
+AutoBuyInfo.Text = "📌 CARA PAKAI:\n1. Buka STORE / SHOP di game\n2. Pastikan button BUY terlihat\n3. Klik TEST BUTTON dulu\n4. Klik START BUY"
+AutoBuyInfo.TextColor3 = Color3.fromRGB(255,255,100)
 AutoBuyInfo.Font = Enum.Font.Gotham
-AutoBuyInfo.TextSize = 11
+AutoBuyInfo.TextSize = 12
 AutoBuyInfo.TextWrapped = true
+AutoBuyInfo.TextXAlignment = Enum.TextXAlignment.Left
 
 local AutoBuyInfoCorner = Instance.new("UICorner")
 AutoBuyInfoCorner.Parent = AutoBuyInfo
 AutoBuyInfoCorner.CornerRadius = UDim.new(0,6)
 
--- Order Status
+-- Status Auto Buy
+local AutoBuyStatus = Instance.new("TextLabel")
+AutoBuyStatus.Parent = AutoBuyContent
+AutoBuyStatus.Size = UDim2.new(1,-20,0,30)
+AutoBuyStatus.Position = UDim2.new(0,10,0,100)
+AutoBuyStatus.BackgroundColor3 = Color3.fromRGB(40,40,50)
+AutoBuyStatus.Text = "⏹️ STOPPED"
+AutoBuyStatus.TextColor3 = Color3.fromRGB(255,100,100)
+AutoBuyStatus.Font = Enum.Font.GothamBold
+AutoBuyStatus.TextSize = 14
+
+local AutoBuyStatusCorner = Instance.new("UICorner")
+AutoBuyStatusCorner.Parent = AutoBuyStatus
+AutoBuyStatusCorner.CornerRadius = UDim.new(0,6)
+
+-- Order Status (Detail)
 local OrderStatus = Instance.new("TextLabel")
 OrderStatus.Parent = AutoBuyContent
 OrderStatus.Size = UDim2.new(1,-20,0,25)
-OrderStatus.Position = UDim2.new(0,10,0,90)
+OrderStatus.Position = UDim2.new(0,10,0,135)
 OrderStatus.BackgroundColor3 = Color3.fromRGB(40,40,50)
 OrderStatus.Text = "⏳ Menunggu START..."
 OrderStatus.TextColor3 = Color3.fromRGB(200,200,200)
@@ -430,7 +446,7 @@ OrderStatusCorner.CornerRadius = UDim.new(0,6)
 local SliderBg = Instance.new("Frame")
 SliderBg.Parent = AutoBuyContent
 SliderBg.Size = UDim2.new(1,-40,0,50)
-SliderBg.Position = UDim2.new(0,20,0,125)
+SliderBg.Position = UDim2.new(0,20,0,170)
 SliderBg.BackgroundColor3 = Color3.fromRGB(40,40,50)
 SliderBg.BorderSizePixel = 0
 
@@ -466,7 +482,7 @@ SliderButtonCorner.CornerRadius = UDim.new(1,0)
 local SliderValue = Instance.new("TextLabel")
 SliderValue.Parent = AutoBuyContent
 SliderValue.Size = UDim2.new(1,-40,0,25)
-SliderValue.Position = UDim2.new(0,20,0,180)
+SliderValue.Position = UDim2.new(0,20,0,225)
 SliderValue.BackgroundTransparency = 1
 SliderValue.Text = "Target: 50 (Total 150 items)"
 SliderValue.TextColor3 = Color3.fromRGB(255,255,255)
@@ -478,7 +494,7 @@ SliderValue.TextSize = 14
 local WaterProgress = Instance.new("TextLabel")
 WaterProgress.Parent = AutoBuyContent
 WaterProgress.Size = UDim2.new(0.3,-10,0,25)
-WaterProgress.Position = UDim2.new(0,15,0,215)
+WaterProgress.Position = UDim2.new(0,15,0,260)
 WaterProgress.BackgroundColor3 = Color3.fromRGB(0,150,150) -- CYAN gelap
 WaterProgress.Text = "💧 WATER: 0"
 WaterProgress.TextColor3 = Color3.fromRGB(255,255,255)
@@ -492,7 +508,7 @@ WaterCorner.CornerRadius = UDim.new(0,6)
 local SugarProgress = Instance.new("TextLabel")
 SugarProgress.Parent = AutoBuyContent
 SugarProgress.Size = UDim2.new(0.3,-10,0,25)
-SugarProgress.Position = UDim2.new(0.35,0,0,215)
+SugarProgress.Position = UDim2.new(0.35,0,0,260)
 SugarProgress.BackgroundColor3 = Color3.fromRGB(0,150,150) -- CYAN gelap
 SugarProgress.Text = "🍬 SUGAR: 0"
 SugarProgress.TextColor3 = Color3.fromRGB(255,255,255)
@@ -506,7 +522,7 @@ SugarCorner.CornerRadius = UDim.new(0,6)
 local GelatinProgress = Instance.new("TextLabel")
 GelatinProgress.Parent = AutoBuyContent
 GelatinProgress.Size = UDim2.new(0.3,-10,0,25)
-GelatinProgress.Position = UDim2.new(0.7,0,0,215)
+GelatinProgress.Position = UDim2.new(0.7,0,0,260)
 GelatinProgress.BackgroundColor3 = Color3.fromRGB(0,150,150) -- CYAN gelap
 GelatinProgress.Text = "🧪 GELATIN: 0"
 GelatinProgress.TextColor3 = Color3.fromRGB(255,255,255)
@@ -521,7 +537,7 @@ GelatinCorner.CornerRadius = UDim.new(0,6)
 local TotalProgress = Instance.new("TextLabel")
 TotalProgress.Parent = AutoBuyContent
 TotalProgress.Size = UDim2.new(1,-20,0,25)
-TotalProgress.Position = UDim2.new(0,10,0,250)
+TotalProgress.Position = UDim2.new(0,10,0,295)
 TotalProgress.BackgroundColor3 = Color3.fromRGB(40,40,50)
 TotalProgress.Text = "Total: 0/150 items (0%)"
 TotalProgress.TextColor3 = Color3.fromRGB(200,200,200)
@@ -536,16 +552,31 @@ TotalProgressCorner.CornerRadius = UDim.new(0,6)
 local ButtonFrame = Instance.new("Frame")
 ButtonFrame.Parent = AutoBuyContent
 ButtonFrame.Size = UDim2.new(1,-20,0,45)
-ButtonFrame.Position = UDim2.new(0,10,0,285)
+ButtonFrame.Position = UDim2.new(0,10,0,330)
 ButtonFrame.BackgroundTransparency = 1
+
+-- Test Button (PENTING: Test dulu sebelum start)
+local TestButton = Instance.new("TextButton")
+TestButton.Parent = ButtonFrame
+TestButton.Size = UDim2.new(0.3,-5,1,0)
+TestButton.Position = UDim2.new(0,0,0,0)
+TestButton.BackgroundColor3 = Color3.fromRGB(100,100,200)
+TestButton.Text = "🔍 TEST"
+TestButton.TextColor3 = Color3.fromRGB(255,255,255)
+TestButton.Font = Enum.Font.GothamBold
+TestButton.TextSize = 14
+
+local TestButtonCorner = Instance.new("UICorner")
+TestButtonCorner.Parent = TestButton
+TestButtonCorner.CornerRadius = UDim.new(0,8)
 
 -- Start Auto Buy Button
 local AutoBuyBtn = Instance.new("TextButton")
 AutoBuyBtn.Parent = ButtonFrame
-AutoBuyBtn.Size = UDim2.new(0.45,-5,1,0)
-AutoBuyBtn.Position = UDim2.new(0,0,0,0)
+AutoBuyBtn.Size = UDim2.new(0.3,-5,1,0)
+AutoBuyBtn.Position = UDim2.new(0.35,0,0,0)
 AutoBuyBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
-AutoBuyBtn.Text = "💰 START BUY"
+AutoBuyBtn.Text = "💰 START"
 AutoBuyBtn.TextColor3 = Color3.fromRGB(255,255,255)
 AutoBuyBtn.Font = Enum.Font.GothamBold
 AutoBuyBtn.TextSize = 14
@@ -557,10 +588,10 @@ AutoBuyBtnCorner.CornerRadius = UDim.new(0,8)
 -- Stop Auto Buy Button
 local StopBuyBtn = Instance.new("TextButton")
 StopBuyBtn.Parent = ButtonFrame
-StopBuyBtn.Size = UDim2.new(0.45,-5,1,0)
-StopBuyBtn.Position = UDim2.new(0.55,0,0,0)
+StopBuyBtn.Size = UDim2.new(0.3,-5,1,0)
+StopBuyBtn.Position = UDim2.new(0.7,0,0,0)
 StopBuyBtn.BackgroundColor3 = Color3.fromRGB(150,50,50)
-StopBuyBtn.Text = "⏹️ STOP BUY"
+StopBuyBtn.Text = "⏹️ STOP"
 StopBuyBtn.TextColor3 = Color3.fromRGB(255,255,255)
 StopBuyBtn.Font = Enum.Font.GothamBold
 StopBuyBtn.TextSize = 14
@@ -569,20 +600,22 @@ local StopBuyBtnCorner = Instance.new("UICorner")
 StopBuyBtnCorner.Parent = StopBuyBtn
 StopBuyBtnCorner.CornerRadius = UDim.new(0,8)
 
--- Test Click Button
-local TestClickBtn = Instance.new("TextButton")
-TestClickBtn.Parent = AutoBuyContent
-TestClickBtn.Size = UDim2.new(0.5,-15,0,35)
-TestClickBtn.Position = UDim2.new(0.25,0,0,335)
-TestClickBtn.BackgroundColor3 = Color3.fromRGB(100,100,200)
-TestClickBtn.Text = "🖱️ TEST CLICK BUY BUTTON"
-TestClickBtn.TextColor3 = Color3.fromRGB(255,255,255)
-TestClickBtn.Font = Enum.Font.GothamBold
-TestClickBtn.TextSize = 11
+-- Debug Info
+local DebugInfo = Instance.new("TextLabel")
+DebugInfo.Parent = AutoBuyContent
+DebugInfo.Size = UDim2.new(1,-20,0,40)
+DebugInfo.Position = UDim2.new(0,10,0,380)
+DebugInfo.BackgroundColor3 = Color3.fromRGB(30,30,40)
+DebugInfo.Text = "Debug: Belum ada aktivitas"
+DebugInfo.TextColor3 = Color3.fromRGB(150,150,150)
+DebugInfo.Font = Enum.Font.Gotham
+DebugInfo.TextSize = 11
+DebugInfo.TextWrapped = true
+DebugInfo.TextXAlignment = Enum.TextXAlignment.Left
 
-local TestClickBtnCorner = Instance.new("UICorner")
-TestClickBtnCorner.Parent = TestClickBtn
-TestClickBtnCorner.CornerRadius = UDim.new(0,6)
+local DebugInfoCorner = Instance.new("UICorner")
+DebugInfoCorner.Parent = DebugInfo
+DebugInfoCorner.CornerRadius = UDim.new(0,6)
 
 -- Variables
 local loopRunning = false
@@ -653,120 +686,77 @@ function pressE()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
 end
 
--- Function to find and click buy button
+-- IMPROVED: Function to find and click buy button dengan debug
 function findAndClickBuyButton(itemName)
-    -- Cari semua button di layar
-    local success, result = pcall(function()
-        -- Cari di PlayerGui
-        for _, gui in pairs(player.PlayerGui:GetChildren()) do
-            if gui:IsA("ScreenGui") then
-                -- Cari semua TextButton
-                for _, button in pairs(gui:GetDescendants()) do
-                    if button:IsA("TextButton") then
-                        local text = button.Text or ""
-                        -- Cari button dengan teks yang sesuai item
-                        if itemName == "Water" and (string.find(string.upper(text), "WATER") or string.find(string.upper(text), "AIR")) then
-                            -- Klik button
-                            local absPos = button.AbsolutePosition
-                            local absSize = button.AbsoluteSize
-                            local clickX = absPos.X + (absSize.X / 2)
-                            local clickY = absPos.Y + (absSize.Y / 2)
-                            
-                            VirtualInputManager:SendMouseMoveEvent(clickX, clickY, game)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 1)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 1)
-                            
-                            return true, "Water"
-                        elseif itemName == "Sugar" and (string.find(string.upper(text), "SUGAR") or string.find(string.upper(text), "GULA")) then
-                            local absPos = button.AbsolutePosition
-                            local absSize = button.AbsoluteSize
-                            local clickX = absPos.X + (absSize.X / 2)
-                            local clickY = absPos.Y + (absSize.Y / 2)
-                            
-                            VirtualInputManager:SendMouseMoveEvent(clickX, clickY, game)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 1)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 1)
-                            
-                            return true, "Sugar"
-                        elseif itemName == "Gelatin" and (string.find(string.upper(text), "GELATIN") or string.find(string.upper(text), "GELATINE")) then
-                            local absPos = button.AbsolutePosition
-                            local absSize = button.AbsoluteSize
-                            local clickX = absPos.X + (absSize.X / 2)
-                            local clickY = absPos.Y + (absSize.Y / 2)
-                            
-                            VirtualInputManager:SendMouseMoveEvent(clickX, clickY, game)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 1)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 1)
-                            
-                            return true, "Gelatin"
-                        end
-                    end
-                end
-            end
-        end
-        
-        -- Cari juga di CoreGui
-        local coreGui = game:GetService("CoreGui")
-        for _, gui in pairs(coreGui:GetChildren()) do
-            if gui:IsA("ScreenGui") then
-                for _, button in pairs(gui:GetDescendants()) do
-                    if button:IsA("TextButton") then
-                        local text = button.Text or ""
-                        if itemName == "Water" and (string.find(string.upper(text), "WATER") or string.find(string.upper(text), "AIR")) then
-                            local absPos = button.AbsolutePosition
-                            local absSize = button.AbsoluteSize
-                            local clickX = absPos.X + (absSize.X / 2)
-                            local clickY = absPos.Y + (absSize.Y / 2)
-                            
-                            VirtualInputManager:SendMouseMoveEvent(clickX, clickY, game)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 1)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 1)
-                            
-                            return true, "Water"
-                        elseif itemName == "Sugar" and (string.find(string.upper(text), "SUGAR") or string.find(string.upper(text), "GULA")) then
-                            local absPos = button.AbsolutePosition
-                            local absSize = button.AbsoluteSize
-                            local clickX = absPos.X + (absSize.X / 2)
-                            local clickY = absPos.Y + (absSize.Y / 2)
-                            
-                            VirtualInputManager:SendMouseMoveEvent(clickX, clickY, game)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 1)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 1)
-                            
-                            return true, "Sugar"
-                        elseif itemName == "Gelatin" and (string.find(string.upper(text), "GELATIN") or string.find(string.upper(text), "GELATINE")) then
-                            local absPos = button.AbsolutePosition
-                            local absSize = button.AbsoluteSize
-                            local clickX = absPos.X + (absSize.X / 2)
-                            local clickY = absPos.Y + (absSize.Y / 2)
-                            
-                            VirtualInputManager:SendMouseMoveEvent(clickX, clickY, game)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 1)
-                            task.wait(0.1)
-                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 1)
-                            
-                            return true, "Gelatin"
-                        end
-                    end
-                end
-            end
-        end
-        
-        return false, "Button " .. itemName .. " tidak ditemukan"
-    end)
+    DebugInfo.Text = "Debug: Mencari button " .. itemName .. "..."
     
-    return success, result
+    local searchTerms = {}
+    if itemName == "Water" then
+        searchTerms = {"WATER", "AIR", "BELI WATER", "BUY WATER"}
+    elseif itemName == "Sugar" then
+        searchTerms = {"SUGAR", "GULA", "BELI SUGAR", "BUY SUGAR", "SUGAR BLOCK"}
+    elseif itemName == "Gelatin" then
+        searchTerms = {"GELATIN", "BELI GELATIN", "BUY GELATIN"}
+    end
+    
+    -- Cari di semua GUI
+    local allGuis = {}
+    
+    -- Tambah PlayerGui
+    for _, gui in pairs(player.PlayerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            table.insert(allGuis, gui)
+        end
+    end
+    
+    -- Tambah CoreGui
+    local coreGui = game:GetService("CoreGui")
+    for _, gui in pairs(coreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            table.insert(allGuis, gui)
+        end
+    end
+    
+    -- Cari button
+    for _, gui in pairs(allGuis) do
+        for _, button in pairs(gui:GetDescendants()) do
+            if button:IsA("TextButton") then
+                local text = button.Text or ""
+                local upperText = string.upper(text)
+                
+                -- Cek apakah teks mengandung salah satu search term
+                for _, term in pairs(searchTerms) do
+                    if string.find(upperText, string.upper(term)) then
+                        -- Dapatkan posisi absolute
+                        local absPos, absSize
+                        local success = pcall(function()
+                            absPos = button.AbsolutePosition
+                            absSize = button.AbsoluteSize
+                        end)
+                        
+                        if success and absPos and absSize then
+                            local clickX = absPos.X + (absSize.X / 2)
+                            local clickY = absPos.Y + (absSize.Y / 2)
+                            
+                            DebugInfo.Text = string.format("Debug: Menemukan button %s di (%.0f, %.0f)", itemName, clickX, clickY)
+                            
+                            -- Pindahkan mouse dan klik
+                            VirtualInputManager:SendMouseMoveEvent(clickX, clickY, game)
+                            task.wait(0.2)
+                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 1)
+                            task.wait(0.1)
+                            VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 1)
+                            
+                            return true, "Berhasil klik " .. itemName
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    DebugInfo.Text = "Debug: Button " .. itemName .. " tidak ditemukan"
+    return false, "Button tidak ditemukan"
 end
 
 -- Update progress display
@@ -791,7 +781,7 @@ function resetCounters()
     updateProgress()
 end
 
--- Main Loop Function (DENGAN JEDA 3 DETIK)
+-- Main Loop Function
 function startMSLoop()
     if loopRunning then return end
     
@@ -923,9 +913,12 @@ function startMSLoop()
     ToolStatus.Text = "Tool: -"
 end
 
--- Auto Buy Function
+-- Auto Buy Function (SEQUENTIAL)
 function startAutoBuy()
-    if autoBuyRunning then return end
+    if autoBuyRunning then 
+        OrderStatus.Text = "⚠️ Auto Buy sudah berjalan!"
+        return 
+    end
     
     -- Reset counters
     resetCounters()
@@ -934,14 +927,16 @@ function startAutoBuy()
     local totalTarget = targetAmount * 3
     local currentCycle = 1
     
+    AutoBuyStatus.Text = "💰 RUNNING"
+    AutoBuyStatus.TextColor3 = Color3.fromRGB(100,255,100)
     OrderStatus.Text = "🔄 Memulai AUTO BUY..."
-    OrderStatus.TextColor3 = Color3.fromRGB(100,255,255) -- CYAN
+    OrderStatus.TextColor3 = Color3.fromRGB(100,255,255)
     
+    -- Loop utama auto buy
     while autoBuyRunning and (waterCount < targetAmount or sugarCount < targetAmount or gelatinCount < targetAmount) do
         -- BELI WATER
         if autoBuyRunning and waterCount < targetAmount then
             OrderStatus.Text = "🔄 Beli WATER (" .. (waterCount + 1) .. "/" .. targetAmount .. ")"
-            OrderStatus.TextColor3 = Color3.fromRGB(100,255,255) -- CYAN
             
             local success, info = findAndClickBuyButton("Water")
             if success then
@@ -949,7 +944,7 @@ function startAutoBuy()
                 updateProgress()
                 task.wait(0.5)
             else
-                OrderStatus.Text = "⚠️ Gagal beli WATER: " .. info
+                OrderStatus.Text = "⚠️ Gagal: " .. info
                 task.wait(1)
             end
         end
@@ -959,7 +954,6 @@ function startAutoBuy()
         -- BELI SUGAR
         if autoBuyRunning and sugarCount < targetAmount then
             OrderStatus.Text = "🔄 Beli SUGAR (" .. (sugarCount + 1) .. "/" .. targetAmount .. ")"
-            OrderStatus.TextColor3 = Color3.fromRGB(100,255,255) -- CYAN
             
             local success, info = findAndClickBuyButton("Sugar")
             if success then
@@ -967,7 +961,7 @@ function startAutoBuy()
                 updateProgress()
                 task.wait(0.5)
             else
-                OrderStatus.Text = "⚠️ Gagal beli SUGAR: " .. info
+                OrderStatus.Text = "⚠️ Gagal: " .. info
                 task.wait(1)
             end
         end
@@ -977,7 +971,6 @@ function startAutoBuy()
         -- BELI GELATIN
         if autoBuyRunning and gelatinCount < targetAmount then
             OrderStatus.Text = "🔄 Beli GELATIN (" .. (gelatinCount + 1) .. "/" .. targetAmount .. ")"
-            OrderStatus.TextColor3 = Color3.fromRGB(100,255,255) -- CYAN
             
             local success, info = findAndClickBuyButton("Gelatin")
             if success then
@@ -985,7 +978,7 @@ function startAutoBuy()
                 updateProgress()
                 task.wait(0.5)
             else
-                OrderStatus.Text = "⚠️ Gagal beli GELATIN: " .. info
+                OrderStatus.Text = "⚠️ Gagal: " .. info
                 task.wait(1)
             end
         end
@@ -993,49 +986,63 @@ function startAutoBuy()
         -- Update cycle info
         if autoBuyRunning then
             currentCycle = currentCycle + 1
-            OrderStatus.Text = string.format("✅ Cycle %d selesai - Progress: %d/%d items", 
+            OrderStatus.Text = string.format("✅ Cycle %d - Progress: %d/%d", 
                 math.floor(currentCycle/3), (waterCount + sugarCount + gelatinCount), totalTarget)
             task.wait(0.5)
         end
     end
     
-    -- Selesai karena target tercapai atau di-stop
+    -- Selesai
     autoBuyRunning = false
+    AutoBuyStatus.Text = "⏹️ STOPPED"
+    AutoBuyStatus.TextColor3 = Color3.fromRGB(255,100,100)
+    
     if waterCount >= targetAmount and sugarCount >= targetAmount and gelatinCount >= targetAmount then
         OrderStatus.Text = "✅ SELESAI! Target tercapai!"
+        DebugInfo.Text = "Debug: Auto Buy selesai - semua target tercapai"
     else
-        OrderStatus.Text = "⏹️ AUTO BUY DIHENTIKAN"
+        OrderStatus.Text = "⏹️ Auto Buy dihentikan"
     end
-    OrderStatus.TextColor3 = Color3.fromRGB(100,255,255) -- CYAN
 end
 
 -- Stop Auto Buy function
 function stopAutoBuy()
     if autoBuyRunning then
         autoBuyRunning = false
-        OrderStatus.Text = "⏹️ Menghentikan AUTO BUY..."
+        OrderStatus.Text = "⏹️ Menghentikan..."
         OrderStatus.TextColor3 = Color3.fromRGB(255,255,0)
+        DebugInfo.Text = "Debug: Auto Buy dihentikan oleh user"
+    else
+        OrderStatus.Text = "⏹️ Auto Buy tidak berjalan"
     end
 end
 
--- Test click function
-function testClick()
-    OrderStatus.Text = "🔍 Test click WATER..."
+-- Test function yang lebih baik
+function testAutoBuy()
+    OrderStatus.Text = "🔍 Testing button WATER..."
     OrderStatus.TextColor3 = Color3.fromRGB(255,255,0)
+    AutoBuyStatus.Text = "🔍 TESTING"
+    AutoBuyStatus.TextColor3 = Color3.fromRGB(255,255,0)
     
     local success, info = findAndClickBuyButton("Water")
     
     if success then
-        OrderStatus.Text = "✅ Berhasil klik WATER"
+        OrderStatus.Text = "✅ Berhasil! Button WATER ditemukan"
         OrderStatus.TextColor3 = Color3.fromRGB(100,255,100)
+        DebugInfo.Text = "Debug: Test berhasil - button WATER diklik"
     else
         OrderStatus.Text = "❌ Gagal: " .. info
         OrderStatus.TextColor3 = Color3.fromRGB(255,100,100)
+        DebugInfo.Text = "Debug: Test gagal - button WATER tidak ditemukan"
     end
     
     task.wait(2)
-    OrderStatus.Text = "⏳ Menunggu START..."
-    OrderStatus.TextColor3 = Color3.fromRGB(200,200,200)
+    if not autoBuyRunning then
+        AutoBuyStatus.Text = "⏹️ STOPPED"
+        AutoBuyStatus.TextColor3 = Color3.fromRGB(255,100,100)
+        OrderStatus.Text = "⏳ Siap untuk START"
+        OrderStatus.TextColor3 = Color3.fromRGB(200,200,200)
+    end
 end
 
 -- TP Functions
@@ -1065,6 +1072,8 @@ MSLoopStopBtn.MouseButton1Click:Connect(function()
     loopRunning = false
 end)
 
+TestButton.MouseButton1Click:Connect(testAutoBuy)
+
 AutoBuyBtn.MouseButton1Click:Connect(function()
     if not autoBuyRunning then
         task.spawn(startAutoBuy)
@@ -1072,8 +1081,6 @@ AutoBuyBtn.MouseButton1Click:Connect(function()
 end)
 
 StopBuyBtn.MouseButton1Click:Connect(stopAutoBuy)
-
-TestClickBtn.MouseButton1Click:Connect(testClick)
 
 -- Slider
 local dragging = false
