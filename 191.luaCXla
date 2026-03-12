@@ -183,7 +183,7 @@ MSLoopContent.Size = UDim2.new(1,0,1,0)
 MSLoopContent.BackgroundTransparency = 1
 MSLoopContent.Visible = false
 MSLoopContent.ScrollBarThickness = 6
-MSLoopContent.CanvasSize = UDim2.new(0,0,0,350)
+MSLoopContent.CanvasSize = UDim2.new(0,0,0,400)
 
 -- Auto Buy Tab Content
 local AutoBuyContent = Instance.new("ScrollingFrame")
@@ -283,7 +283,7 @@ RSDesc.TextXAlignment = Enum.TextXAlignment.Left
 RSDesc.Font = Enum.Font.Gotham
 RSDesc.TextSize = 12
 
--- MS LOOP CONTENT
+-- MS LOOP CONTENT (DENGAN JEDA 3 DETIK)
 local MSLoopTitle = Instance.new("TextLabel")
 MSLoopTitle.Parent = MSLoopContent
 MSLoopTitle.Size = UDim2.new(1,-20,0,30)
@@ -343,17 +343,17 @@ ToolStatus.TextXAlignment = Enum.TextXAlignment.Left
 ToolStatus.Font = Enum.Font.GothamBold
 ToolStatus.TextSize = 14
 
--- Informasi Discord
-local DiscordInfo = Instance.new("TextLabel")
-DiscordInfo.Parent = MSLoopContent
-DiscordInfo.Size = UDim2.new(1,-20,0,20)
-DiscordInfo.Position = UDim2.new(0,10,0,175)
-DiscordInfo.BackgroundTransparency = 1
-DiscordInfo.Text = "📢 ada bug? lapor di dc"
-DiscordInfo.TextColor3 = Color3.fromRGB(255,150,200)
-DiscordInfo.TextXAlignment = Enum.TextXAlignment.Left
-DiscordInfo.Font = Enum.Font.Gotham
-DiscordInfo.TextSize = 12
+-- Informasi Jeda
+local JedaInfo = Instance.new("TextLabel")
+JedaInfo.Parent = MSLoopContent
+JedaInfo.Size = UDim2.new(1,-20,0,20)
+JedaInfo.Position = UDim2.new(0,10,0,175)
+JedaInfo.BackgroundTransparency = 1
+JedaInfo.Text = "⏱️ Jeda 3 detik setelah WATER & GELATIN"
+JedaInfo.TextColor3 = Color3.fromRGB(255,255,100)
+JedaInfo.TextXAlignment = Enum.TextXAlignment.Left
+JedaInfo.Font = Enum.Font.Gotham
+JedaInfo.TextSize = 12
 
 local MSLoopStartBtn = Instance.new("TextButton")
 MSLoopStartBtn.Parent = MSLoopContent
@@ -383,7 +383,7 @@ local MSLoopStopCorner = Instance.new("UICorner")
 MSLoopStopCorner.Parent = MSLoopStopBtn
 MSLoopStopCorner.CornerRadius = UDim.new(0,8)
 
--- AUTO BUY CONTENT (WARNA CYAN SEMUA + STOP BUY)
+-- AUTO BUY CONTENT
 local AutoBuyTitle = Instance.new("TextLabel")
 AutoBuyTitle.Parent = AutoBuyContent
 AutoBuyTitle.Size = UDim2.new(1,-20,0,30)
@@ -474,7 +474,7 @@ SliderValue.TextXAlignment = Enum.TextXAlignment.Left
 SliderValue.Font = Enum.Font.GothamBold
 SliderValue.TextSize = 14
 
--- Progress Labels (WARNA CYAN SEMUA)
+-- Progress Labels
 local WaterProgress = Instance.new("TextLabel")
 WaterProgress.Parent = AutoBuyContent
 WaterProgress.Size = UDim2.new(0.3,-10,0,25)
@@ -554,7 +554,7 @@ local AutoBuyBtnCorner = Instance.new("UICorner")
 AutoBuyBtnCorner.Parent = AutoBuyBtn
 AutoBuyBtnCorner.CornerRadius = UDim.new(0,8)
 
--- Stop Auto Buy Button (FITUR BARU)
+-- Stop Auto Buy Button
 local StopBuyBtn = Instance.new("TextButton")
 StopBuyBtn.Parent = ButtonFrame
 StopBuyBtn.Size = UDim2.new(0.45,-5,1,0)
@@ -791,7 +791,7 @@ function resetCounters()
     updateProgress()
 end
 
--- Main Loop Function
+-- Main Loop Function (DENGAN JEDA 3 DETIK)
 function startMSLoop()
     if loopRunning then return end
     
@@ -821,7 +821,17 @@ function startMSLoop()
             break
         end
         
-        task.wait(0.2)
+        -- JEDA 3 DETIK SETELAH WATER
+        if loopRunning then
+            MSLoopStepLabel.Text = "Jeda 3 detik setelah WATER..."
+            local jedaStart = tick()
+            while loopRunning and (tick() - jedaStart) < 3 do
+                local remaining = 3 - (tick() - jedaStart)
+                MSLoopTimer.Text = string.format("Jeda: %d/3s", math.floor(3 - remaining))
+                task.wait(0.1)
+            end
+        end
+        
         if not loopRunning then break end
         
         -- STEP 2: SUGAR BLOCK BAG (2 seconds)
@@ -863,11 +873,13 @@ function startMSLoop()
             break
         end
         
-        -- JEDA 2 DETIK SETELAH GELATIN
+        -- JEDA 3 DETIK SETELAH GELATIN
         if loopRunning then
+            MSLoopStepLabel.Text = "Jeda 3 detik setelah GELATIN..."
             local jedaStart = tick()
-            while loopRunning and (tick() - jedaStart) < 2 do
-                MSLoopTimer.Text = "Timer: 45/45s - GELATIN Complete"
+            while loopRunning and (tick() - jedaStart) < 3 do
+                local remaining = 3 - (tick() - jedaStart)
+                MSLoopTimer.Text = string.format("Jeda: %d/3s", math.floor(3 - remaining))
                 task.wait(0.1)
             end
         end
@@ -911,7 +923,7 @@ function startMSLoop()
     ToolStatus.Text = "Tool: -"
 end
 
--- Auto Buy Function (SEQUENTIAL)
+-- Auto Buy Function
 function startAutoBuy()
     if autoBuyRunning then return end
     
