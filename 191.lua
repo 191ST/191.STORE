@@ -1,7 +1,6 @@
 local player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -11,7 +10,7 @@ local storePurchaseRE = remotes and remotes:FindFirstChild("StorePurchase")
 
 -- Konfigurasi ukuran HP
 local GUI_WIDTH = 420
-local GUI_HEIGHT = 580
+local GUI_HEIGHT = 520
 local TAB_HEIGHT = 35
 local TITLE_HEIGHT = 45
 
@@ -131,7 +130,7 @@ TabFrame.BorderSizePixel = 0
 
 local TPTabBtn = Instance.new("TextButton")
 TPTabBtn.Parent = TabFrame
-TPTabBtn.Size = UDim2.new(0.2,-2,1,-4)
+TPTabBtn.Size = UDim2.new(0.33,-2,1,-4)
 TPTabBtn.Position = UDim2.new(0,2,0,2)
 TPTabBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
 TPTabBtn.Text = "🚀 TP"
@@ -141,43 +140,23 @@ TPTabBtn.TextSize = 11
 
 local MSLoopTabBtn = Instance.new("TextButton")
 MSLoopTabBtn.Parent = TabFrame
-MSLoopTabBtn.Size = UDim2.new(0.2,-2,1,-4)
-MSLoopTabBtn.Position = UDim2.new(0.2,0,0,2)
+MSLoopTabBtn.Size = UDim2.new(0.33,-2,1,-4)
+MSLoopTabBtn.Position = UDim2.new(0.33,0,0,2)
 MSLoopTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
 MSLoopTabBtn.Text = "🔄 MS"
 MSLoopTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
 MSLoopTabBtn.Font = Enum.Font.GothamBold
 MSLoopTabBtn.TextSize = 11
 
-local AutoBuyTabBtn = Instance.new("TextButton")
-AutoBuyTabBtn.Parent = TabFrame
-AutoBuyTabBtn.Size = UDim2.new(0.2,-2,1,-4)
-AutoBuyTabBtn.Position = UDim2.new(0.4,0,0,2)
-AutoBuyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-AutoBuyTabBtn.Text = "🛒 BUY"
-AutoBuyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-AutoBuyTabBtn.Font = Enum.Font.GothamBold
-AutoBuyTabBtn.TextSize = 11
-
 local MSSafetyTabBtn = Instance.new("TextButton")
 MSSafetyTabBtn.Parent = TabFrame
-MSSafetyTabBtn.Size = UDim2.new(0.2,-2,1,-4)
-MSSafetyTabBtn.Position = UDim2.new(0.6,0,0,2)
+MSSafetyTabBtn.Size = UDim2.new(0.33,-2,1,-4)
+MSSafetyTabBtn.Position = UDim2.new(0.66,0,0,2)
 MSSafetyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
 MSSafetyTabBtn.Text = "🛡️ SAFE"
 MSSafetyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
 MSSafetyTabBtn.Font = Enum.Font.GothamBold
-MSSafetyTabBtn.TextSize = 10
-
-local AutoSellTabBtn = Instance.new("TextButton")
-AutoSellTabBtn.Parent = TabFrame
-AutoSellTabBtn.Size = UDim2.new(0.2,-2,1,-4)
-AutoSellTabBtn.Position = UDim2.new(0.8,0,0,2)
-AutoSellTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-AutoSellTabBtn.Text = "💰 SELL"
-AutoSellTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-AutoSellTabBtn.Font = Enum.Font.GothamBold
-AutoSellTabBtn.TextSize = 11
+MSSafetyTabBtn.TextSize = 11
 
 -- Content Container
 local Content = Instance.new("Frame")
@@ -210,126 +189,285 @@ MSLoopContent.Visible = false
 MSLoopContent.ScrollBarThickness = 4
 MSLoopContent.CanvasSize = UDim2.new(0,0,0,480)
 
--- AUTO BUY TAB CONTENT
-local AutoBuyContent = Instance.new("ScrollingFrame")
-AutoBuyContent.Parent = Content
-AutoBuyContent.Size = UDim2.new(1,0,1,0)
-AutoBuyContent.BackgroundTransparency = 1
-AutoBuyContent.Visible = false
-AutoBuyContent.ScrollBarThickness = 4
-AutoBuyContent.CanvasSize = UDim2.new(0,0,0,350)
-
--- MS SAFETY TAB CONTENT
+-- MS SAFETY TAB CONTENT (BYPASS SPEED)
 local MSSafetyContent = Instance.new("ScrollingFrame")
 MSSafetyContent.Parent = Content
 MSSafetyContent.Size = UDim2.new(1,0,1,0)
 MSSafetyContent.BackgroundTransparency = 1
 MSSafetyContent.Visible = false
 MSSafetyContent.ScrollBarThickness = 4
-MSSafetyContent.CanvasSize = UDim2.new(0,0,0,560)
+MSSafetyContent.CanvasSize = UDim2.new(0,0,0,300)
 
--- AUTO SELL TAB CONTENT
-local AutoSellContent = Instance.new("ScrollingFrame")
-AutoSellContent.Parent = Content
-AutoSellContent.Size = UDim2.new(1,0,1,0)
-AutoSellContent.BackgroundTransparency = 1
-AutoSellContent.Visible = false
-AutoSellContent.ScrollBarThickness = 4
-AutoSellContent.CanvasSize = UDim2.new(0,0,0,220)
+-- ========== BYPASS SPEED LIMIT SERVER (BUKAN WALKSPEED) ==========
+-- Fitur ini mencegah kendaraan ditarik kembali oleh server saat teleport
 
--- ========== SPEED UNLIMITED BYPASS ==========
-local SpeedUnlimited = {
+local BypassSpeed = {
     enabled = false,
-    originalWalkspeed = 16,
-    targetSpeed = 1000,
+    originalLinearVelocity = nil,
+    originalAngularVelocity = nil,
     loopConnection = nil,
-    respawnConnection = nil
+    vehicleConnection = nil
 }
 
-local function applySpeedUnlimited()
-    local char = player.Character
-    if not char then return end
+-- Fungsi untuk membekukan kendaraan saat teleport agar tidak ditarik server
+local function freezeVehicle(vehicle)
+    if not vehicle then return end
     
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-    
-    if SpeedUnlimited.enabled then
-        if SpeedUnlimited.originalWalkspeed == 16 then
-            SpeedUnlimited.originalWalkspeed = humanoid.WalkSpeed
+    for _, part in ipairs(vehicle:GetDescendants()) do
+        if part:IsA("BasePart") then
+            pcall(function()
+                -- Simpan velocity asli jika belum disimpan
+                if BypassSpeed.originalLinearVelocity == nil then
+                    BypassSpeed.originalLinearVelocity = part.AssemblyLinearVelocity
+                    BypassSpeed.originalAngularVelocity = part.AssemblyAngularVelocity
+                end
+                -- Set velocity ke 0 agar server tidak bisa menarik
+                part.AssemblyLinearVelocity = Vector3.zero
+                part.AssemblyAngularVelocity = Vector3.zero
+                -- Anchored sebentar agar server tidak bisa mengubah posisi
+                part.Anchored = true
+            end)
         end
-        humanoid.WalkSpeed = SpeedUnlimited.targetSpeed
-    else
-        humanoid.WalkSpeed = SpeedUnlimited.originalWalkspeed
     end
 end
 
-local function startSpeedLoop()
-    if SpeedUnlimited.loopConnection then
-        SpeedUnlimited.loopConnection:Disconnect()
+-- Fungsi untuk mengembalikan kendaraan normal
+local function unfreezeVehicle(vehicle)
+    if not vehicle then return end
+    
+    for _, part in ipairs(vehicle:GetDescendants()) do
+        if part:IsA("BasePart") then
+            pcall(function()
+                part.Anchored = false
+                if BypassSpeed.originalLinearVelocity then
+                    part.AssemblyLinearVelocity = BypassSpeed.originalLinearVelocity
+                    part.AssemblyAngularVelocity = BypassSpeed.originalAngularVelocity
+                end
+            end)
+        end
+    end
+end
+
+-- Loop untuk menjaga kendaraan tetap bebas dari tarikan server
+local function startBypassLoop()
+    if BypassSpeed.loopConnection then
+        BypassSpeed.loopConnection:Disconnect()
     end
     
-    SpeedUnlimited.loopConnection = RunService.Heartbeat:Connect(function()
-        if SpeedUnlimited.enabled then
-            local char = player.Character
-            if char then
-                local humanoid = char:FindFirstChildOfClass("Humanoid")
-                if humanoid and humanoid.WalkSpeed ~= SpeedUnlimited.targetSpeed then
-                    humanoid.WalkSpeed = SpeedUnlimited.targetSpeed
+    BypassSpeed.loopConnection = RunService.Heartbeat:Connect(function()
+        if BypassSpeed.enabled then
+            local character = player.Character
+            if character then
+                local hum = character:FindFirstChildOfClass("Humanoid")
+                if hum and hum.SeatPart then
+                    local vehicle = hum.SeatPart:FindFirstAncestorOfClass("Model")
+                    if vehicle then
+                        -- Terus reset velocity agar server tidak bisa menarik
+                        for _, part in ipairs(vehicle:GetDescendants()) do
+                            if part:IsA("BasePart") and not part.Anchored then
+                                pcall(function()
+                                    -- Jika kecepatan terlalu tinggi (ditarik server), reset
+                                    if part.AssemblyLinearVelocity.Magnitude > 50 then
+                                        part.AssemblyLinearVelocity = Vector3.zero
+                                        part.AssemblyAngularVelocity = Vector3.zero
+                                    end
+                                end)
+                            end
+                        end
+                    end
                 end
             end
         end
     end)
 end
 
-local function enableSpeedUnlimited(speed)
-    SpeedUnlimited.targetSpeed = speed or 1000
-    SpeedUnlimited.enabled = true
-    startSpeedLoop()
-    applySpeedUnlimited()
+-- Fungsi untuk mengaktifkan bypass speed
+local function enableBypassSpeed()
+    if BypassSpeed.enabled then return end
+    BypassSpeed.enabled = true
+    startBypassLoop()
     
-    if SpeedUnlimited.respawnConnection then
-        SpeedUnlimited.respawnConnection:Disconnect()
-    end
-    
-    SpeedUnlimited.respawnConnection = player.CharacterAdded:Connect(function(char)
+    -- Handle saat naik kendaraan
+    BypassSpeed.vehicleConnection = player.CharacterAdded:Connect(function(char)
         task.wait(0.5)
-        if SpeedUnlimited.enabled then
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = SpeedUnlimited.targetSpeed
+        if BypassSpeed.enabled then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum:GetPropertyChangedSignal("SeatPart"):Connect(function()
+                    if BypassSpeed.enabled and hum.SeatPart then
+                        local vehicle = hum.SeatPart:FindFirstAncestorOfClass("Model")
+                        if vehicle then
+                            freezeVehicle(vehicle)
+                            task.wait(0.1)
+                            unfreezeVehicle(vehicle)
+                        end
+                    end
+                end)
             end
         end
     end)
 end
 
-local function disableSpeedUnlimited()
-    SpeedUnlimited.enabled = false
+-- Fungsi untuk menonaktifkan bypass speed
+local function disableBypassSpeed()
+    BypassSpeed.enabled = false
     
-    if SpeedUnlimited.loopConnection then
-        SpeedUnlimited.loopConnection:Disconnect()
-        SpeedUnlimited.loopConnection = nil
+    if BypassSpeed.loopConnection then
+        BypassSpeed.loopConnection:Disconnect()
+        BypassSpeed.loopConnection = nil
     end
     
-    if SpeedUnlimited.respawnConnection then
-        SpeedUnlimited.respawnConnection:Disconnect()
-        SpeedUnlimited.respawnConnection = nil
+    if BypassSpeed.vehicleConnection then
+        BypassSpeed.vehicleConnection:Disconnect()
+        BypassSpeed.vehicleConnection = nil
     end
     
-    local char = player.Character
-    if char then
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = SpeedUnlimited.originalWalkspeed
+    -- Reset semua kendaraan yang mungkin terpengaruh
+    local character = player.Character
+    if character then
+        local hum = character:FindFirstChildOfClass("Humanoid")
+        if hum and hum.SeatPart then
+            local vehicle = hum.SeatPart:FindFirstAncestorOfClass("Model")
+            if vehicle then
+                for _, part in ipairs(vehicle:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        pcall(function()
+                            part.Anchored = false
+                        end)
+                    end
+                end
+            end
         end
     end
 end
 
-local function setSpeedValue(speed)
-    SpeedUnlimited.targetSpeed = math.clamp(speed, 16, 1000)
-    if SpeedUnlimited.enabled then
-        applySpeedUnlimited()
-    end
-end
+-- ========== BYPASS SPEED UI DI TAB SAFE ==========
+local BypassFrame = Instance.new("Frame")
+BypassFrame.Parent = MSSafetyContent
+BypassFrame.Size = UDim2.new(1,-16,0,160)
+BypassFrame.Position = UDim2.new(0,8,0,20)
+BypassFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
+BypassFrame.BorderSizePixel = 0
+local BypassFrameCorner = Instance.new("UICorner")
+BypassFrameCorner.Parent = BypassFrame
+BypassFrameCorner.CornerRadius = UDim.new(0,12)
+
+local BypassIcon = Instance.new("TextLabel")
+BypassIcon.Parent = BypassFrame
+BypassIcon.Size = UDim2.new(0,60,1,0)
+BypassIcon.Position = UDim2.new(0,12,0,0)
+BypassIcon.BackgroundTransparency = 1
+BypassIcon.Text = "⚡"
+BypassIcon.TextSize = 48
+BypassIcon.TextColor3 = Color3.fromRGB(255,200,50)
+BypassIcon.Font = Enum.Font.GothamBold
+
+local BypassTitle = Instance.new("TextLabel")
+BypassTitle.Parent = BypassFrame
+BypassTitle.Size = UDim2.new(1,-85,0,28)
+BypassTitle.Position = UDim2.new(0,75,0,12)
+BypassTitle.BackgroundTransparency = 1
+BypassTitle.Text = "SPEED LIMIT BYPASS"
+BypassTitle.TextColor3 = Color3.fromRGB(255,100,100)
+BypassTitle.TextXAlignment = Enum.TextXAlignment.Left
+BypassTitle.Font = Enum.Font.GothamBold
+BypassTitle.TextSize = 14
+
+local BypassDesc = Instance.new("TextLabel")
+BypassDesc.Parent = BypassFrame
+BypassDesc.Size = UDim2.new(1,-85,0,40)
+BypassDesc.Position = UDim2.new(0,75,0,40)
+BypassDesc.BackgroundTransparency = 1
+BypassDesc.Text = "Mencegah kendaraan ditarik server\nsaat teleport / disconnect"
+BypassDesc.TextColor3 = Color3.fromRGB(160,160,180)
+BypassDesc.TextXAlignment = Enum.TextXAlignment.Left
+BypassDesc.Font = Enum.Font.Gotham
+BypassDesc.TextSize = 10
+
+local BypassStatusLabel = Instance.new("TextLabel")
+BypassStatusLabel.Parent = BypassFrame
+BypassStatusLabel.Size = UDim2.new(0.3,0,0,28)
+BypassStatusLabel.Position = UDim2.new(0,75,0,85)
+BypassStatusLabel.BackgroundTransparency = 1
+BypassStatusLabel.Text = "STATUS:"
+BypassStatusLabel.TextColor3 = Color3.fromRGB(200,200,200)
+BypassStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+BypassStatusLabel.Font = Enum.Font.GothamBold
+BypassStatusLabel.TextSize = 12
+
+local BypassStatusValue = Instance.new("TextLabel")
+BypassStatusValue.Parent = BypassFrame
+BypassStatusValue.Size = UDim2.new(0.5,0,0,28)
+BypassStatusValue.Position = UDim2.new(0.35,0,0,85)
+BypassStatusValue.BackgroundTransparency = 1
+BypassStatusValue.Text = "❌ OFF"
+BypassStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
+BypassStatusValue.TextXAlignment = Enum.TextXAlignment.Left
+BypassStatusValue.Font = Enum.Font.GothamBold
+BypassStatusValue.TextSize = 12
+
+local BypassEnableBtn = Instance.new("TextButton")
+BypassEnableBtn.Parent = BypassFrame
+BypassEnableBtn.Size = UDim2.new(0.4,-12,0,38)
+BypassEnableBtn.Position = UDim2.new(0,75,0,118)
+BypassEnableBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
+BypassEnableBtn.Text = "✅ ENABLE"
+BypassEnableBtn.TextColor3 = Color3.fromRGB(255,255,255)
+BypassEnableBtn.Font = Enum.Font.GothamBold
+BypassEnableBtn.TextSize = 12
+local BypassEnableCorner = Instance.new("UICorner")
+BypassEnableCorner.Parent = BypassEnableBtn
+BypassEnableCorner.CornerRadius = UDim.new(0,6)
+
+local BypassDisableBtn = Instance.new("TextButton")
+BypassDisableBtn.Parent = BypassFrame
+BypassDisableBtn.Size = UDim2.new(0.4,-12,0,38)
+BypassDisableBtn.Position = UDim2.new(0.5,12,0,118)
+BypassDisableBtn.BackgroundColor3 = Color3.fromRGB(150,50,50)
+BypassDisableBtn.Text = "❌ DISABLE"
+BypassDisableBtn.TextColor3 = Color3.fromRGB(255,255,255)
+BypassDisableBtn.Font = Enum.Font.GothamBold
+BypassDisableBtn.TextSize = 12
+local BypassDisableCorner = Instance.new("UICorner")
+BypassDisableCorner.Parent = BypassDisableBtn
+BypassDisableCorner.CornerRadius = UDim.new(0,6)
+
+BypassEnableBtn.MouseButton1Click:Connect(function()
+    enableBypassSpeed()
+    BypassStatusValue.Text = "✅ ON"
+    BypassStatusValue.TextColor3 = Color3.fromRGB(100,255,100)
+    BypassEnableBtn.BackgroundColor3 = Color3.fromRGB(80,180,80)
+end)
+
+BypassDisableBtn.MouseButton1Click:Connect(function()
+    disableBypassSpeed()
+    BypassStatusValue.Text = "❌ OFF"
+    BypassStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
+    BypassEnableBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
+end)
+
+-- Info tambahan
+local InfoFrame = Instance.new("Frame")
+InfoFrame.Parent = MSSafetyContent
+InfoFrame.Size = UDim2.new(1,-16,0,80)
+InfoFrame.Position = UDim2.new(0,8,0,190)
+InfoFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+InfoFrame.BorderSizePixel = 0
+local InfoFrameCorner = Instance.new("UICorner")
+InfoFrameCorner.Parent = InfoFrame
+InfoFrameCorner.CornerRadius = UDim.new(0,8)
+
+local InfoText = Instance.new("TextLabel")
+InfoText.Parent = InfoFrame
+InfoText.Size = UDim2.new(1,-16,1,0)
+InfoText.Position = UDim2.new(0,8,0,8)
+InfoText.BackgroundTransparency = 1
+InfoText.Text = "⚠️ FITUR INI BERGUNA UNTUK:\n• Mencegah kendaraan tertarik server saat teleport\n• Mencegah kendaraan hilang saat disconnect\n• Bypass speed limit server (bukan walkspeed karakter)\n• Aktifkan SEBELUM teleport atau naik kendaraan"
+InfoText.TextColor3 = Color3.fromRGB(200,200,100)
+InfoText.TextXAlignment = Enum.TextXAlignment.Left
+InfoText.TextYAlignment = Enum.TextYAlignment.Top
+InfoText.Font = Enum.Font.Gotham
+InfoText.TextSize = 10
 
 -- ========== SEMUA LOKASI TELEPORT ==========
 local LOCATIONS = {
@@ -346,7 +484,7 @@ local LOCATIONS = {
     {name = "⚒️ Material Storage", pos = Vector3.new(521.32, 47.79, 617.25), desc = "Tempat Bahan"},
 }
 
--- ========== TP FUNCTION ==========
+-- ========== TP FUNCTION DENGAN BYPASS INTEGRASI ==========
 local function moveVehicle(vehicle, targetPos)
     local anchor = vehicle.PrimaryPart
         or vehicle:FindFirstChildOfClass("VehicleSeat")
@@ -356,6 +494,7 @@ local function moveVehicle(vehicle, targetPos)
     local spawnPos = targetPos + Vector3.new(0,0.5,0)
     local newCF = CFrame.new(spawnPos, spawnPos + Vector3.new(0,0,1))
     
+    -- FREEZE dengan bypass jika aktif
     for _,p in ipairs(vehicle:GetDescendants()) do
         if p:IsA("BasePart") then
             pcall(function()
@@ -367,6 +506,7 @@ local function moveVehicle(vehicle, targetPos)
     end
     task.wait(0.05)
     
+    -- Pindahkan
     if vehicle.PrimaryPart then
         vehicle:SetPrimaryPartCFrame(newCF)
     else
@@ -374,6 +514,7 @@ local function moveVehicle(vehicle, targetPos)
     end
     task.wait(0.05)
     
+    -- UNFREEZE
     for _,p in ipairs(vehicle:GetDescendants()) do
         if p:IsA("BasePart") then
             pcall(function()
@@ -416,7 +557,6 @@ tpPadding.PaddingLeft = UDim.new(0, 8)
 tpPadding.PaddingRight = UDim.new(0, 8)
 tpPadding.PaddingTop = UDim.new(0, 6)
 
-local tpButtons = {}
 for i, loc in ipairs(LOCATIONS) do
     local btn = Instance.new("TextButton")
     btn.Parent = TPContent
@@ -461,28 +601,27 @@ for i, loc in ipairs(LOCATIONS) do
     desc.Font = Enum.Font.Gotham
     desc.TextSize = 10
     
-    tpButtons[i] = btn
     btn.MouseButton1Click:Connect(function()
         stepTeleport(loc.pos)
     end)
 end
 
--- ========== MS LOOP CONTENT ==========
+-- ========== MS LOOP CONTENT (SEDERHANA) ==========
 local MSLoopTitle = Instance.new("TextLabel")
 MSLoopTitle.Parent = MSLoopContent
-MSLoopTitle.Size = UDim2.new(1,-16,0,25)
-MSLoopTitle.Position = UDim2.new(0,8,0,5)
+MSLoopTitle.Size = UDim2.new(1,-16,0,28)
+MSLoopTitle.Position = UDim2.new(0,8,0,10)
 MSLoopTitle.BackgroundTransparency = 1
 MSLoopTitle.Text = "🔄 MS LOOP (AUTO TOOLS)"
 MSLoopTitle.TextColor3 = Color3.fromRGB(100,255,100)
 MSLoopTitle.TextXAlignment = Enum.TextXAlignment.Left
 MSLoopTitle.Font = Enum.Font.GothamBold
-MSLoopTitle.TextSize = 12
+MSLoopTitle.TextSize = 14
 
 local MSLoopStatus = Instance.new("TextLabel")
 MSLoopStatus.Parent = MSLoopContent
-MSLoopStatus.Size = UDim2.new(1,-16,0,32)
-MSLoopStatus.Position = UDim2.new(0,8,0,35)
+MSLoopStatus.Size = UDim2.new(1,-16,0,40)
+MSLoopStatus.Position = UDim2.new(0,8,0,45)
 MSLoopStatus.BackgroundColor3 = Color3.fromRGB(40,40,50)
 MSLoopStatus.Text = "⏹️ LOOP STOPPED"
 MSLoopStatus.TextColor3 = Color3.fromRGB(255,100,100)
@@ -492,110 +631,12 @@ local MSLoopStatusCorner = Instance.new("UICorner")
 MSLoopStatusCorner.Parent = MSLoopStatus
 MSLoopStatusCorner.CornerRadius = UDim.new(0,6)
 
-local BuyIndicatorFrame = Instance.new("Frame")
-BuyIndicatorFrame.Parent = MSLoopContent
-BuyIndicatorFrame.Size = UDim2.new(1,-16,0,130)
-BuyIndicatorFrame.Position = UDim2.new(0,8,0,75)
-BuyIndicatorFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
-BuyIndicatorFrame.BorderSizePixel = 0
-local BuyIndicatorCorner = Instance.new("UICorner")
-BuyIndicatorCorner.Parent = BuyIndicatorFrame
-BuyIndicatorCorner.CornerRadius = UDim.new(0,8)
-
-local BuyIndicatorTitle = Instance.new("TextLabel")
-BuyIndicatorTitle.Parent = BuyIndicatorFrame
-BuyIndicatorTitle.Size = UDim2.new(1,-12,0,20)
-BuyIndicatorTitle.Position = UDim2.new(0,6,0,5)
-BuyIndicatorTitle.BackgroundTransparency = 1
-BuyIndicatorTitle.Text = "🛒 INDIKATOR STOK"
-BuyIndicatorTitle.TextColor3 = Color3.fromRGB(255,255,100)
-BuyIndicatorTitle.TextXAlignment = Enum.TextXAlignment.Left
-BuyIndicatorTitle.Font = Enum.Font.GothamBold
-BuyIndicatorTitle.TextSize = 11
-
-local BisaMasak = Instance.new("TextLabel")
-BisaMasak.Parent = BuyIndicatorFrame
-BisaMasak.Size = UDim2.new(1,-12,0,22)
-BisaMasak.Position = UDim2.new(0,6,0,28)
-BisaMasak.BackgroundTransparency = 1
-BisaMasak.Text = "🍳 BISA MASAK: 0"
-BisaMasak.TextColor3 = Color3.fromRGB(255,255,255)
-BisaMasak.TextXAlignment = Enum.TextXAlignment.Left
-BisaMasak.Font = Enum.Font.GothamBold
-BisaMasak.TextSize = 13
-
-local WaterIndicator = Instance.new("TextLabel")
-WaterIndicator.Parent = BuyIndicatorFrame
-WaterIndicator.Size = UDim2.new(1,-12,0,20)
-WaterIndicator.Position = UDim2.new(0,6,0,52)
-WaterIndicator.BackgroundTransparency = 1
-WaterIndicator.Text = "💧 WATER: 0"
-WaterIndicator.TextColor3 = Color3.fromRGB(255,255,255)
-WaterIndicator.TextXAlignment = Enum.TextXAlignment.Left
-WaterIndicator.Font = Enum.Font.GothamBold
-WaterIndicator.TextSize = 11
-
-local SugarIndicator = Instance.new("TextLabel")
-SugarIndicator.Parent = BuyIndicatorFrame
-SugarIndicator.Size = UDim2.new(1,-12,0,20)
-SugarIndicator.Position = UDim2.new(0,6,0,74)
-SugarIndicator.BackgroundTransparency = 1
-SugarIndicator.Text = "🍚 SUGAR: 0"
-SugarIndicator.TextColor3 = Color3.fromRGB(255,255,255)
-SugarIndicator.TextXAlignment = Enum.TextXAlignment.Left
-SugarIndicator.Font = Enum.Font.GothamBold
-SugarIndicator.TextSize = 11
-
-local GelatinIndicator = Instance.new("TextLabel")
-GelatinIndicator.Parent = BuyIndicatorFrame
-GelatinIndicator.Size = UDim2.new(1,-12,0,20)
-GelatinIndicator.Position = UDim2.new(0,6,0,96)
-GelatinIndicator.BackgroundTransparency = 1
-GelatinIndicator.Text = "🧪 GELATIN: 0"
-GelatinIndicator.TextColor3 = Color3.fromRGB(255,255,255)
-GelatinIndicator.TextXAlignment = Enum.TextXAlignment.Left
-GelatinIndicator.Font = Enum.Font.GothamBold
-GelatinIndicator.TextSize = 11
-
-local MSLoopStepLabel = Instance.new("TextLabel")
-MSLoopStepLabel.Parent = MSLoopContent
-MSLoopStepLabel.Size = UDim2.new(1,-16,0,20)
-MSLoopStepLabel.Position = UDim2.new(0,8,0,210)
-MSLoopStepLabel.BackgroundTransparency = 1
-MSLoopStepLabel.Text = "Step: Waiting..."
-MSLoopStepLabel.TextColor3 = Color3.fromRGB(200,200,200)
-MSLoopStepLabel.TextXAlignment = Enum.TextXAlignment.Left
-MSLoopStepLabel.Font = Enum.Font.Gotham
-MSLoopStepLabel.TextSize = 10
-
-local MSLoopTimer = Instance.new("TextLabel")
-MSLoopTimer.Parent = MSLoopContent
-MSLoopTimer.Size = UDim2.new(1,-16,0,20)
-MSLoopTimer.Position = UDim2.new(0,8,0,232)
-MSLoopTimer.BackgroundTransparency = 1
-MSLoopTimer.Text = "Timer: 0s"
-MSLoopTimer.TextColor3 = Color3.fromRGB(200,200,200)
-MSLoopTimer.TextXAlignment = Enum.TextXAlignment.Left
-MSLoopTimer.Font = Enum.Font.Gotham
-MSLoopTimer.TextSize = 10
-
-local ToolStatus = Instance.new("TextLabel")
-ToolStatus.Parent = MSLoopContent
-ToolStatus.Size = UDim2.new(1,-16,0,20)
-ToolStatus.Position = UDim2.new(0,8,0,254)
-ToolStatus.BackgroundTransparency = 1
-ToolStatus.Text = "Tool: -"
-ToolStatus.TextColor3 = Color3.fromRGB(200,200,200)
-ToolStatus.TextXAlignment = Enum.TextXAlignment.Left
-ToolStatus.Font = Enum.Font.GothamBold
-ToolStatus.TextSize = 10
-
 local MSLoopStartBtn = Instance.new("TextButton")
 MSLoopStartBtn.Parent = MSLoopContent
-MSLoopStartBtn.Size = UDim2.new(0.5,-8,0,36)
-MSLoopStartBtn.Position = UDim2.new(0,8,0,280)
+MSLoopStartBtn.Size = UDim2.new(0.5,-8,0,40)
+MSLoopStartBtn.Position = UDim2.new(0,8,0,100)
 MSLoopStartBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
-MSLoopStartBtn.Text = "▶️ START"
+MSLoopStartBtn.Text = "▶️ START LOOP"
 MSLoopStartBtn.TextColor3 = Color3.fromRGB(255,255,255)
 MSLoopStartBtn.Font = Enum.Font.GothamBold
 MSLoopStartBtn.TextSize = 12
@@ -605,10 +646,10 @@ MSLoopStartCorner.CornerRadius = UDim.new(0,6)
 
 local MSLoopStopBtn = Instance.new("TextButton")
 MSLoopStopBtn.Parent = MSLoopContent
-MSLoopStopBtn.Size = UDim2.new(0.5,-8,0,36)
-MSLoopStopBtn.Position = UDim2.new(0.5,4,0,280)
+MSLoopStopBtn.Size = UDim2.new(0.5,-8,0,40)
+MSLoopStopBtn.Position = UDim2.new(0.5,4,0,100)
 MSLoopStopBtn.BackgroundColor3 = Color3.fromRGB(150,50,50)
-MSLoopStopBtn.Text = "⏹️ STOP"
+MSLoopStopBtn.Text = "⏹️ STOP LOOP"
 MSLoopStopBtn.TextColor3 = Color3.fromRGB(255,255,255)
 MSLoopStopBtn.Font = Enum.Font.GothamBold
 MSLoopStopBtn.TextSize = 12
@@ -616,527 +657,8 @@ local MSLoopStopCorner = Instance.new("UICorner")
 MSLoopStopCorner.Parent = MSLoopStopBtn
 MSLoopStopCorner.CornerRadius = UDim.new(0,6)
 
-local RefreshBtn = Instance.new("TextButton")
-RefreshBtn.Parent = MSLoopContent
-RefreshBtn.Size = UDim2.new(1,-16,0,28)
-RefreshBtn.Position = UDim2.new(0,8,0,322)
-RefreshBtn.BackgroundColor3 = Color3.fromRGB(60,60,80)
-RefreshBtn.Text = "🔄 REFRESH"
-RefreshBtn.TextColor3 = Color3.fromRGB(200,200,255)
-RefreshBtn.Font = Enum.Font.GothamBold
-RefreshBtn.TextSize = 11
-local RefreshBtnCorner = Instance.new("UICorner")
-RefreshBtnCorner.Parent = RefreshBtn
-RefreshBtnCorner.CornerRadius = UDim.new(0,6)
-
--- ========== AUTO BUY UI ==========
-local AutoBuyTitle = Instance.new("TextLabel")
-AutoBuyTitle.Parent = AutoBuyContent
-AutoBuyTitle.Size = UDim2.new(1,-16,0,28)
-AutoBuyTitle.Position = UDim2.new(0,8,0,5)
-AutoBuyTitle.BackgroundTransparency = 1
-AutoBuyTitle.Text = "🛒 AUTO BUY BAHAN"
-AutoBuyTitle.TextColor3 = Color3.fromRGB(100,200,255)
-AutoBuyTitle.TextXAlignment = Enum.TextXAlignment.Left
-AutoBuyTitle.Font = Enum.Font.GothamBold
-AutoBuyTitle.TextSize = 13
-
-local AutoBuyDesc = Instance.new("TextLabel")
-AutoBuyDesc.Parent = AutoBuyContent
-AutoBuyDesc.Size = UDim2.new(1,-16,0,32)
-AutoBuyDesc.Position = UDim2.new(0,8,0,35)
-AutoBuyDesc.BackgroundTransparency = 1
-AutoBuyDesc.Text = "Beli Water, Sugar, Gelatin dari NPC"
-AutoBuyDesc.TextColor3 = Color3.fromRGB(200,200,200)
-AutoBuyDesc.TextXAlignment = Enum.TextXAlignment.Left
-AutoBuyDesc.Font = Enum.Font.Gotham
-AutoBuyDesc.TextSize = 10
-
-local JumlahBeliFrame = Instance.new("Frame")
-JumlahBeliFrame.Parent = AutoBuyContent
-JumlahBeliFrame.Size = UDim2.new(1,-16,0,70)
-JumlahBeliFrame.Position = UDim2.new(0,8,0,75)
-JumlahBeliFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
-JumlahBeliFrame.BorderSizePixel = 0
-local JumlahBeliCorner = Instance.new("UICorner")
-JumlahBeliCorner.Parent = JumlahBeliFrame
-JumlahBeliCorner.CornerRadius = UDim.new(0,8)
-
-local JumlahBeliTitle = Instance.new("TextLabel")
-JumlahBeliTitle.Parent = JumlahBeliFrame
-JumlahBeliTitle.Size = UDim2.new(1,-12,0,22)
-JumlahBeliTitle.Position = UDim2.new(0,6,0,5)
-JumlahBeliTitle.BackgroundTransparency = 1
-JumlahBeliTitle.Text = "📦 JUMLAH BELI PER ITEM"
-JumlahBeliTitle.TextColor3 = Color3.fromRGB(255,255,100)
-JumlahBeliTitle.TextXAlignment = Enum.TextXAlignment.Left
-JumlahBeliTitle.Font = Enum.Font.GothamBold
-JumlahBeliTitle.TextSize = 11
-
-local JumlahSliderBg = Instance.new("Frame")
-JumlahSliderBg.Parent = JumlahBeliFrame
-JumlahSliderBg.Size = UDim2.new(0.8,0,0,8)
-JumlahSliderBg.Position = UDim2.new(0.1,0,0,40)
-JumlahSliderBg.BackgroundColor3 = Color3.fromRGB(60,60,80)
-JumlahSliderBg.BorderSizePixel = 0
-local JumlahSliderBgCorner = Instance.new("UICorner")
-JumlahSliderBgCorner.Parent = JumlahSliderBg
-JumlahSliderBgCorner.CornerRadius = UDim.new(0,4)
-
-local JumlahSliderFill = Instance.new("Frame")
-JumlahSliderFill.Parent = JumlahSliderBg
-JumlahSliderFill.Size = UDim2.new(0.5,0,1,0)
-JumlahSliderFill.BackgroundColor3 = Color3.fromRGB(100,200,255)
-JumlahSliderFill.BorderSizePixel = 0
-local JumlahSliderFillCorner = Instance.new("UICorner")
-JumlahSliderFillCorner.Parent = JumlahSliderFill
-JumlahSliderFillCorner.CornerRadius = UDim.new(0,4)
-
-local JumlahValueLabel = Instance.new("TextLabel")
-JumlahValueLabel.Parent = JumlahBeliFrame
-JumlahValueLabel.Size = UDim2.new(0.2,0,0,22)
-JumlahValueLabel.Position = UDim2.new(0.8,-10,0,38)
-JumlahValueLabel.BackgroundTransparency = 1
-JumlahValueLabel.Text = "10x"
-JumlahValueLabel.TextColor3 = Color3.fromRGB(100,200,255)
-JumlahValueLabel.TextXAlignment = Enum.TextXAlignment.Right
-JumlahValueLabel.Font = Enum.Font.GothamBold
-JumlahValueLabel.TextSize = 12
-
-local BuyStatusFrame = Instance.new("Frame")
-BuyStatusFrame.Parent = AutoBuyContent
-BuyStatusFrame.Size = UDim2.new(1,-16,0,70)
-BuyStatusFrame.Position = UDim2.new(0,8,0,155)
-BuyStatusFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
-BuyStatusFrame.BorderSizePixel = 0
-local BuyStatusCorner = Instance.new("UICorner")
-BuyStatusCorner.Parent = BuyStatusFrame
-BuyStatusCorner.CornerRadius = UDim.new(0,8)
-
-local BuyStatusIcon = Instance.new("TextLabel")
-BuyStatusIcon.Parent = BuyStatusFrame
-BuyStatusIcon.Size = UDim2.new(0,45,1,0)
-BuyStatusIcon.Position = UDim2.new(0,8,0,0)
-BuyStatusIcon.BackgroundTransparency = 1
-BuyStatusIcon.Text = "🛒"
-BuyStatusIcon.TextSize = 32
-
-local BuyStatusLabel = Instance.new("TextLabel")
-BuyStatusLabel.Parent = BuyStatusFrame
-BuyStatusLabel.Size = UDim2.new(1,-65,0,18)
-BuyStatusLabel.Position = UDim2.new(0,55,0,8)
-BuyStatusLabel.BackgroundTransparency = 1
-BuyStatusLabel.Text = "STATUS"
-BuyStatusLabel.TextColor3 = Color3.fromRGB(200,200,200)
-BuyStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-BuyStatusLabel.Font = Enum.Font.GothamBold
-BuyStatusLabel.TextSize = 11
-
-local BuyStatusValue = Instance.new("TextLabel")
-BuyStatusValue.Parent = BuyStatusFrame
-BuyStatusValue.Size = UDim2.new(1,-65,0,32)
-BuyStatusValue.Position = UDim2.new(0,55,0,28)
-BuyStatusValue.BackgroundTransparency = 1
-BuyStatusValue.Text = "⏹️ BELUM MULAI"
-BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
-BuyStatusValue.TextXAlignment = Enum.TextXAlignment.Left
-BuyStatusValue.Font = Enum.Font.GothamBold
-BuyStatusValue.TextSize = 11
-
-local BuyTotalLabel = Instance.new("TextLabel")
-BuyTotalLabel.Parent = BuyStatusFrame
-BuyTotalLabel.Size = UDim2.new(1,-65,0,18)
-BuyTotalLabel.Position = UDim2.new(0,55,0,52)
-BuyTotalLabel.BackgroundTransparency = 1
-BuyTotalLabel.Text = "Total: 0 item"
-BuyTotalLabel.TextColor3 = Color3.fromRGB(100,200,255)
-BuyTotalLabel.TextXAlignment = Enum.TextXAlignment.Left
-BuyTotalLabel.Font = Enum.Font.Gotham
-BuyTotalLabel.TextSize = 10
-
-local BuyStartBtn = Instance.new("TextButton")
-BuyStartBtn.Parent = AutoBuyContent
-BuyStartBtn.Size = UDim2.new(0.5,-8,0,38)
-BuyStartBtn.Position = UDim2.new(0,8,0,235)
-BuyStartBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
-BuyStartBtn.Text = "▶️ START BUY"
-BuyStartBtn.TextColor3 = Color3.fromRGB(255,255,255)
-BuyStartBtn.Font = Enum.Font.GothamBold
-BuyStartBtn.TextSize = 12
-local BuyStartCorner = Instance.new("UICorner")
-BuyStartCorner.Parent = BuyStartBtn
-BuyStartCorner.CornerRadius = UDim.new(0,6)
-
-local BuyStopBtn = Instance.new("TextButton")
-BuyStopBtn.Parent = AutoBuyContent
-BuyStopBtn.Size = UDim2.new(0.5,-8,0,38)
-BuyStopBtn.Position = UDim2.new(0.5,4,0,235)
-BuyStopBtn.BackgroundColor3 = Color3.fromRGB(150,50,50)
-BuyStopBtn.Text = "⏹️ STOP"
-BuyStopBtn.TextColor3 = Color3.fromRGB(255,255,255)
-BuyStopBtn.Font = Enum.Font.GothamBold
-BuyStopBtn.TextSize = 12
-local BuyStopCorner = Instance.new("UICorner")
-BuyStopCorner.Parent = BuyStopBtn
-BuyStopCorner.CornerRadius = UDim.new(0,6)
-
--- ========== MS SAFETY CONTENT (BLINK + SPEED) ==========
-local MSSafetyTitle = Instance.new("TextLabel")
-MSSafetyTitle.Parent = MSSafetyContent
-MSSafetyTitle.Size = UDim2.new(1,-16,0,28)
-MSSafetyTitle.Position = UDim2.new(0,8,0,5)
-MSSafetyTitle.BackgroundTransparency = 1
-MSSafetyTitle.Text = "🛡️ BLINK / TELEPORT MINI"
-MSSafetyTitle.TextColor3 = Color3.fromRGB(100,200,255)
-MSSafetyTitle.TextXAlignment = Enum.TextXAlignment.Left
-MSSafetyTitle.Font = Enum.Font.GothamBold
-MSSafetyTitle.TextSize = 14
-
--- ========== SPEED UNLIMITED UI ==========
-local SpeedFrame = Instance.new("Frame")
-SpeedFrame.Parent = MSSafetyContent
-SpeedFrame.Size = UDim2.new(1,-16,0,130)
-SpeedFrame.Position = UDim2.new(0,8,0,290)
-SpeedFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
-SpeedFrame.BorderSizePixel = 0
-local SpeedFrameCorner = Instance.new("UICorner")
-SpeedFrameCorner.Parent = SpeedFrame
-SpeedFrameCorner.CornerRadius = UDim.new(0,8)
-
-local SpeedTitle = Instance.new("TextLabel")
-SpeedTitle.Parent = SpeedFrame
-SpeedTitle.Size = UDim2.new(1,-12,0,22)
-SpeedTitle.Position = UDim2.new(0,6,0,5)
-SpeedTitle.BackgroundTransparency = 1
-SpeedTitle.Text = "⚡ SPEED UNLIMITED BYPASS"
-SpeedTitle.TextColor3 = Color3.fromRGB(255,100,100)
-SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
-SpeedTitle.Font = Enum.Font.GothamBold
-SpeedTitle.TextSize = 11
-
-local SpeedStatusLabel = Instance.new("TextLabel")
-SpeedStatusLabel.Parent = SpeedFrame
-SpeedStatusLabel.Size = UDim2.new(0.4,0,0,28)
-SpeedStatusLabel.Position = UDim2.new(0,6,0,30)
-SpeedStatusLabel.BackgroundTransparency = 1
-SpeedStatusLabel.Text = "STATUS:"
-SpeedStatusLabel.TextColor3 = Color3.fromRGB(200,200,200)
-SpeedStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-SpeedStatusLabel.Font = Enum.Font.GothamBold
-SpeedStatusLabel.TextSize = 12
-
-local SpeedStatusValue = Instance.new("TextLabel")
-SpeedStatusValue.Parent = SpeedFrame
-SpeedStatusValue.Size = UDim2.new(0.5,0,0,28)
-SpeedStatusValue.Position = UDim2.new(0.4,0,0,30)
-SpeedStatusValue.BackgroundTransparency = 1
-SpeedStatusValue.Text = "❌ OFF"
-SpeedStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
-SpeedStatusValue.TextXAlignment = Enum.TextXAlignment.Left
-SpeedStatusValue.Font = Enum.Font.GothamBold
-SpeedStatusValue.TextSize = 12
-
-local SpeedSliderBg = Instance.new("Frame")
-SpeedSliderBg.Parent = SpeedFrame
-SpeedSliderBg.Size = UDim2.new(0.7,0,0,8)
-SpeedSliderBg.Position = UDim2.new(0.1,0,0,70)
-SpeedSliderBg.BackgroundColor3 = Color3.fromRGB(60,60,80)
-SpeedSliderBg.BorderSizePixel = 0
-local SpeedSliderBgCorner = Instance.new("UICorner")
-SpeedSliderBgCorner.Parent = SpeedSliderBg
-SpeedSliderBgCorner.CornerRadius = UDim.new(0,4)
-
-local SpeedSliderFill = Instance.new("Frame")
-SpeedSliderFill.Parent = SpeedSliderBg
-SpeedSliderFill.Size = UDim2.new(1,0,1,0)
-SpeedSliderFill.BackgroundColor3 = Color3.fromRGB(255,100,100)
-SpeedSliderFill.BorderSizePixel = 0
-local SpeedSliderFillCorner = Instance.new("UICorner")
-SpeedSliderFillCorner.Parent = SpeedSliderFill
-SpeedSliderFillCorner.CornerRadius = UDim.new(0,4)
-
-local SpeedValueLabel = Instance.new("TextLabel")
-SpeedValueLabel.Parent = SpeedFrame
-SpeedValueLabel.Size = UDim2.new(0.2,0,0,22)
-SpeedValueLabel.Position = UDim2.new(0.8,-10,0,65)
-SpeedValueLabel.BackgroundTransparency = 1
-SpeedValueLabel.Text = "1000"
-SpeedValueLabel.TextColor3 = Color3.fromRGB(255,100,100)
-SpeedValueLabel.TextXAlignment = Enum.TextXAlignment.Right
-SpeedValueLabel.Font = Enum.Font.GothamBold
-SpeedValueLabel.TextSize = 12
-
-local SpeedEnableBtn = Instance.new("TextButton")
-SpeedEnableBtn.Parent = SpeedFrame
-SpeedEnableBtn.Size = UDim2.new(0.45,-8,0,36)
-SpeedEnableBtn.Position = UDim2.new(0,6,0,95)
-SpeedEnableBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
-SpeedEnableBtn.Text = "✅ ENABLE"
-SpeedEnableBtn.TextColor3 = Color3.fromRGB(255,255,255)
-SpeedEnableBtn.Font = Enum.Font.GothamBold
-SpeedEnableBtn.TextSize = 12
-local SpeedEnableCorner = Instance.new("UICorner")
-SpeedEnableCorner.Parent = SpeedEnableBtn
-SpeedEnableCorner.CornerRadius = UDim.new(0,6)
-
-local SpeedDisableBtn = Instance.new("TextButton")
-SpeedDisableBtn.Parent = SpeedFrame
-SpeedDisableBtn.Size = UDim2.new(0.45,-8,0,36)
-SpeedDisableBtn.Position = UDim2.new(0.55,2,0,95)
-SpeedDisableBtn.BackgroundColor3 = Color3.fromRGB(150,50,50)
-SpeedDisableBtn.Text = "❌ DISABLE"
-SpeedDisableBtn.TextColor3 = Color3.fromRGB(255,255,255)
-SpeedDisableBtn.Font = Enum.Font.GothamBold
-SpeedDisableBtn.TextSize = 12
-local SpeedDisableCorner = Instance.new("UICorner")
-SpeedDisableCorner.Parent = SpeedDisableBtn
-SpeedDisableCorner.CornerRadius = UDim.new(0,6)
-
-local BlinkStatus = Instance.new("TextLabel")
-BlinkStatus.Parent = MSSafetyContent
-BlinkStatus.Size = UDim2.new(1,-16,0,32)
-BlinkStatus.Position = UDim2.new(0,8,0,430)
-BlinkStatus.BackgroundColor3 = Color3.fromRGB(40,40,50)
-BlinkStatus.Text = "Klik tombol di atas untuk blink"
-BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-BlinkStatus.Font = Enum.Font.GothamBold
-BlinkStatus.TextSize = 10
-local BlinkStatusCorner = Instance.new("UICorner")
-BlinkStatusCorner.Parent = BlinkStatus
-BlinkStatusCorner.CornerRadius = UDim.new(0,6)
-
--- ========== AUTO SELL CONTENT ==========
-local AutoSellTitle = Instance.new("TextLabel")
-AutoSellTitle.Parent = AutoSellContent
-AutoSellTitle.Size = UDim2.new(1,-16,0,28)
-AutoSellTitle.Position = UDim2.new(0,8,0,8)
-AutoSellTitle.BackgroundTransparency = 1
-AutoSellTitle.Text = "💰 AUTO SELL"
-AutoSellTitle.TextColor3 = Color3.fromRGB(100,255,100)
-AutoSellTitle.TextXAlignment = Enum.TextXAlignment.Left
-AutoSellTitle.Font = Enum.Font.GothamBold
-AutoSellTitle.TextSize = 16
-
-local AutoSellStatusFrame = Instance.new("Frame")
-AutoSellStatusFrame.Parent = AutoSellContent
-AutoSellStatusFrame.Size = UDim2.new(1,-16,0,85)
-AutoSellStatusFrame.Position = UDim2.new(0,8,0,45)
-AutoSellStatusFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
-AutoSellStatusFrame.BorderSizePixel = 0
-local AutoSellStatusCorner = Instance.new("UICorner")
-AutoSellStatusCorner.Parent = AutoSellStatusFrame
-AutoSellStatusCorner.CornerRadius = UDim.new(0,8)
-
-local AutoSellIcon = Instance.new("TextLabel")
-AutoSellIcon.Parent = AutoSellStatusFrame
-AutoSellIcon.Size = UDim2.new(0,45,1,0)
-AutoSellIcon.Position = UDim2.new(0,8,0,0)
-AutoSellIcon.BackgroundTransparency = 1
-AutoSellIcon.Text = "💰"
-AutoSellIcon.TextSize = 40
-AutoSellIcon.Font = Enum.Font.GothamBold
-AutoSellIcon.TextColor3 = Color3.fromRGB(255,255,100)
-
-local AutoSellStatusTitle = Instance.new("TextLabel")
-AutoSellStatusTitle.Parent = AutoSellStatusFrame
-AutoSellStatusTitle.Size = UDim2.new(1,-70,0,22)
-AutoSellStatusTitle.Position = UDim2.new(0,55,0,8)
-AutoSellStatusTitle.BackgroundTransparency = 1
-AutoSellStatusTitle.Text = "STATUS"
-AutoSellStatusTitle.TextColor3 = Color3.fromRGB(255,255,255)
-AutoSellStatusTitle.TextXAlignment = Enum.TextXAlignment.Left
-AutoSellStatusTitle.Font = Enum.Font.GothamBold
-AutoSellStatusTitle.TextSize = 12
-
-local AutoSellStatus = Instance.new("TextLabel")
-AutoSellStatus.Parent = AutoSellStatusFrame
-AutoSellStatus.Size = UDim2.new(1,-70,0,22)
-AutoSellStatus.Position = UDim2.new(0,55,0,30)
-AutoSellStatus.BackgroundTransparency = 1
-AutoSellStatus.Text = "⏹️ STOPPED"
-AutoSellStatus.TextColor3 = Color3.fromRGB(255,100,100)
-AutoSellStatus.TextXAlignment = Enum.TextXAlignment.Left
-AutoSellStatus.Font = Enum.Font.GothamBold
-AutoSellStatus.TextSize = 12
-
-local AutoSellCounter = Instance.new("TextLabel")
-AutoSellCounter.Parent = AutoSellStatusFrame
-AutoSellCounter.Size = UDim2.new(1,-70,0,18)
-AutoSellCounter.Position = UDim2.new(0,55,0,52)
-AutoSellCounter.BackgroundTransparency = 1
-AutoSellCounter.Text = "Terjual: 0"
-AutoSellCounter.TextColor3 = Color3.fromRGB(100,255,255)
-AutoSellCounter.TextXAlignment = Enum.TextXAlignment.Left
-AutoSellCounter.Font = Enum.Font.GothamBold
-AutoSellCounter.TextSize = 10
-
-local AutoSellInfo = Instance.new("TextLabel")
-AutoSellInfo.Parent = AutoSellStatusFrame
-AutoSellInfo.Size = UDim2.new(1,-70,0,15)
-AutoSellInfo.Position = UDim2.new(0,55,0,70)
-AutoSellInfo.BackgroundTransparency = 1
-AutoSellInfo.Text = "Tools: 0"
-AutoSellInfo.TextColor3 = Color3.fromRGB(200,200,200)
-AutoSellInfo.TextXAlignment = Enum.TextXAlignment.Left
-AutoSellInfo.Font = Enum.Font.Gotham
-AutoSellInfo.TextSize = 9
-
-local AutoSellButtonFrame = Instance.new("Frame")
-AutoSellButtonFrame.Parent = AutoSellContent
-AutoSellButtonFrame.Size = UDim2.new(1,-16,0,45)
-AutoSellButtonFrame.Position = UDim2.new(0,8,0,140)
-AutoSellButtonFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
-AutoSellButtonFrame.BorderSizePixel = 0
-local AutoSellButtonCorner = Instance.new("UICorner")
-AutoSellButtonCorner.Parent = AutoSellButtonFrame
-AutoSellButtonCorner.CornerRadius = UDim.new(0,8)
-
-local AutoSellStartBtn = Instance.new("TextButton")
-AutoSellStartBtn.Parent = AutoSellButtonFrame
-AutoSellStartBtn.Size = UDim2.new(0.5,-8,0,32)
-AutoSellStartBtn.Position = UDim2.new(0,6,0,6)
-AutoSellStartBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
-AutoSellStartBtn.Text = "▶️ START"
-AutoSellStartBtn.TextColor3 = Color3.fromRGB(255,255,255)
-AutoSellStartBtn.Font = Enum.Font.GothamBold
-AutoSellStartBtn.TextSize = 12
-local AutoSellStartCorner = Instance.new("UICorner")
-AutoSellStartCorner.Parent = AutoSellStartBtn
-AutoSellStartCorner.CornerRadius = UDim.new(0,6)
-
-local AutoSellStopBtn = Instance.new("TextButton")
-AutoSellStopBtn.Parent = AutoSellButtonFrame
-AutoSellStopBtn.Size = UDim2.new(0.5,-8,0,32)
-AutoSellStopBtn.Position = UDim2.new(0.5,2,0,6)
-AutoSellStopBtn.BackgroundColor3 = Color3.fromRGB(150,50,50)
-AutoSellStopBtn.Text = "⏹️ STOP"
-AutoSellStopBtn.TextColor3 = Color3.fromRGB(255,255,255)
-AutoSellStopBtn.Font = Enum.Font.GothamBold
-AutoSellStopBtn.TextSize = 12
-local AutoSellStopCorner = Instance.new("UICorner")
-AutoSellStopCorner.Parent = AutoSellStopBtn
-AutoSellStopCorner.CornerRadius = UDim.new(0,6)
-
--- ========== FUNCTIONS ==========
-local function countTools(toolName)
-    local count = 0
-    if player.Character then
-        for _, child in pairs(player.Character:GetChildren()) do
-            if child:IsA("Tool") and string.find(string.lower(child.Name), string.lower(toolName)) then
-                count = count + 1
-            end
-        end
-    end
-    local backpack = player:FindFirstChild("Backpack")
-    if backpack then
-        for _, child in pairs(backpack:GetChildren()) do
-            if child:IsA("Tool") and string.find(string.lower(child.Name), string.lower(toolName)) then
-                count = count + 1
-            end
-        end
-    end
-    return count
-end
-
-local function updateBuyIndicators()
-    local waterCount = countTools("water")
-    local sugarCount = countTools("sugar")
-    local gelatinCount = countTools("gelatin")
-    
-    WaterIndicator.Text = "💧 WATER: " .. waterCount
-    SugarIndicator.Text = "🍚 SUGAR: " .. sugarCount
-    GelatinIndicator.Text = "🧪 GELATIN: " .. gelatinCount
-    
-    if waterCount > 0 then WaterIndicator.TextColor3 = Color3.fromRGB(100,200,255)
-    else WaterIndicator.TextColor3 = Color3.fromRGB(255,255,255) end
-    
-    if sugarCount > 0 then SugarIndicator.TextColor3 = Color3.fromRGB(100,200,255)
-    else SugarIndicator.TextColor3 = Color3.fromRGB(255,255,255) end
-    
-    if gelatinCount > 0 then GelatinIndicator.TextColor3 = Color3.fromRGB(100,200,255)
-    else GelatinIndicator.TextColor3 = Color3.fromRGB(255,255,255) end
-    
-    local bisaMasak = math.min(waterCount, sugarCount, gelatinCount)
-    BisaMasak.Text = "🍳 BISA MASAK: " .. bisaMasak
-    if bisaMasak >= 3 then BisaMasak.TextColor3 = Color3.fromRGB(100,255,100)
-    elseif bisaMasak >= 1 then BisaMasak.TextColor3 = Color3.fromRGB(255,255,100)
-    else BisaMasak.TextColor3 = Color3.fromRGB(255,255,255) end
-end
-
-local SELL_TOOLS = {"Small Marshmallow Bag", "Medium Marshmallow Bag", "Large Marshmallow Bag"}
-
-local function getSellTools()
-    local tools = {}
-    if player.Character then
-        for _, child in pairs(player.Character:GetChildren()) do
-            if child:IsA("Tool") then
-                for _, toolName in ipairs(SELL_TOOLS) do
-                    if child.Name == toolName then table.insert(tools, child) break end
-                end
-            end
-        end
-    end
-    local backpack = player:FindFirstChild("Backpack")
-    if backpack then
-        for _, child in pairs(backpack:GetChildren()) do
-            if child:IsA("Tool") then
-                for _, toolName in ipairs(SELL_TOOLS) do
-                    if child.Name == toolName then table.insert(tools, child) break end
-                end
-            end
-        end
-    end
-    return tools
-end
-
-local autoSellRunning = false
-local autoSellCount = 0
-
-local function startAutoSell()
-    if autoSellRunning then return end
-    autoSellRunning = true
-    autoSellCount = 0
-    AutoSellStatus.Text = "▶️ RUNNING"
-    AutoSellStatus.TextColor3 = Color3.fromRGB(100,255,100)
-    
-    task.spawn(function()
-        while autoSellRunning do
-            local tools = getSellTools()
-            AutoSellInfo.Text = "Tools: " .. #tools
-            
-            if #tools > 0 then
-                for _, tool in ipairs(tools) do
-                    if not autoSellRunning then break end
-                    if tool and tool.Parent then
-                        if tool.Parent == player:FindFirstChild("Backpack") then
-                            local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
-                            if humanoid then humanoid:EquipTool(tool) task.wait(0.3) end
-                        end
-                        AutoSellStatus.Text = "▶️ HOLD E..."
-                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                        local holdStart = tick()
-                        while autoSellRunning and (tick() - holdStart) < 2 do task.wait(0.1) end
-                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                        autoSellCount = autoSellCount + 1
-                        AutoSellCounter.Text = "Terjual: " .. autoSellCount
-                        AutoSellStatus.Text = "▶️ RUNNING"
-                        task.wait(1)
-                    end
-                end
-            else
-                task.wait(2)
-            end
-            task.wait(0.5)
-        end
-    end)
-end
-
-local function stopAutoSell()
-    autoSellRunning = false
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-    AutoSellStatus.Text = "⏹️ STOPPED"
-    AutoSellStatus.TextColor3 = Color3.fromRGB(255,100,100)
-end
+-- Simple MS Loop Functions
+local loopRunning = false
 
 local function findTool(toolName)
     if player.Character then
@@ -1177,8 +699,6 @@ local function pressE()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
 end
 
-local loopRunning = false
-
 local function startMSLoop()
     if loopRunning then return end
     loopRunning = true
@@ -1187,506 +707,109 @@ local function startMSLoop()
     
     task.spawn(function()
         while loopRunning do
-            updateBuyIndicators()
-            
             local waterTool = findTool("water")
             if waterTool and equipTool(waterTool) then
-                ToolStatus.Text = "Tool: WATER"
-                MSLoopStepLabel.Text = "Step 1: WATER - 20 seconds"
+                MSLoopStatus.Text = "🔧 WATER - 20s"
                 pressE()
-                local startTime = tick()
-                while loopRunning and (tick() - startTime) < 20 do
-                    local remaining = 20 - (tick() - startTime)
-                    MSLoopTimer.Text = string.format("Timer: %d/20s - WATER", math.floor(20 - remaining))
-                    task.wait(0.1)
-                end
+                task.wait(20)
             else
-                MSLoopStepLabel.Text = "ERROR: Water tool not found!"
                 break
             end
             
-            task.wait(3)
+            task.wait(2)
             if not loopRunning then break end
             
             local sugarTool = findTool("sugar")
             if sugarTool and equipTool(sugarTool) then
-                ToolStatus.Text = "Tool: SUGAR"
-                MSLoopStepLabel.Text = "Step 2: SUGAR - 2 seconds"
+                MSLoopStatus.Text = "🔧 SUGAR - 2s"
                 pressE()
-                local startTime = tick()
-                while loopRunning and (tick() - startTime) < 2 do
-                    local remaining = 2 - (tick() - startTime)
-                    MSLoopTimer.Text = string.format("Timer: %d/2s - SUGAR", math.floor(2 - remaining))
-                    task.wait(0.1)
-                end
+                task.wait(2)
             else
-                MSLoopStepLabel.Text = "ERROR: Sugar tool not found!"
                 break
             end
             
-            task.wait(0.5)
+            task.wait(1)
             if not loopRunning then break end
             
             local gelatinTool = findTool("gelatin")
             if gelatinTool and equipTool(gelatinTool) then
-                ToolStatus.Text = "Tool: GELATIN"
-                MSLoopStepLabel.Text = "Step 3: GELATIN - 45 seconds"
+                MSLoopStatus.Text = "🔧 GELATIN - 45s"
                 pressE()
-                local startTime = tick()
-                while loopRunning and (tick() - startTime) < 45 do
-                    local remaining = 45 - (tick() - startTime)
-                    MSLoopTimer.Text = string.format("Timer: %d/45s - GELATIN", math.floor(45 - remaining))
-                    task.wait(0.1)
-                end
+                task.wait(45)
             else
-                MSLoopStepLabel.Text = "ERROR: Gelatin tool not found!"
                 break
             end
             
-            task.wait(3)
+            task.wait(2)
             if not loopRunning then break end
             
             local emptyTool = findTool("empty") or findTool("bag")
             if emptyTool and equipTool(emptyTool) then
-                ToolStatus.Text = "Tool: EMPTY BAG"
-                MSLoopStepLabel.Text = "Step 4: EMPTY BAG - 2 seconds (HASIL)"
+                MSLoopStatus.Text = "🔧 EMPTY BAG - 2s"
                 pressE()
-                local startTime = tick()
-                while loopRunning and (tick() - startTime) < 2 do
-                    local remaining = 2 - (tick() - startTime)
-                    MSLoopTimer.Text = string.format("Timer: %d/2s - HASIL", math.floor(2 - remaining))
-                    task.wait(0.1)
-                end
-            else
-                MSLoopStepLabel.Text = "ERROR: Empty Bag tool not found!"
-                break
+                task.wait(2)
             end
-            
-            updateBuyIndicators()
-            MSLoopStepLabel.Text = "Loop complete! Restarting..."
-            task.wait(1)
         end
         
         loopRunning = false
         MSLoopStatus.Text = "⏹️ LOOP STOPPED"
         MSLoopStatus.TextColor3 = Color3.fromRGB(255,100,100)
-        MSLoopStepLabel.Text = "Step: Stopped"
-        MSLoopTimer.Text = "Timer: 0s"
-        ToolStatus.Text = "Tool: -"
-        updateBuyIndicators()
     end)
 end
-
--- ========== AUTO BUY FUNCTIONS ==========
-local autoBuyRunning = false
-local currentBuyAmount = 10
-local autoBuyTotalBought = 0
-
-local function setBuyAmount(amount)
-    currentBuyAmount = math.clamp(amount, 1, 50)
-    JumlahValueLabel.Text = currentBuyAmount .. "x"
-    JumlahSliderFill.Size = UDim2.new((currentBuyAmount - 1) / 49, 0, 1, 0)
-end
-
-local function startAutoBuy()
-    if autoBuyRunning then return end
-    if not storePurchaseRE then
-        BuyStatusValue.Text = "❌ RemoteEvent tidak ditemukan!"
-        BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
-        task.wait(2)
-        BuyStatusValue.Text = "⏹️ BELUM MULAI"
-        BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
-        return
-    end
-    
-    autoBuyRunning = true
-    autoBuyTotalBought = 0
-    BuyStatusValue.Text = "▶️ RUNNING"
-    BuyStatusValue.TextColor3 = Color3.fromRGB(100,255,100)
-    BuyTotalLabel.Text = "Total: 0 item"
-    
-    local BUY_ITEMS = {
-        {name = "Water", display = "💧 Water"},
-        {name = "Sugar Block Bag", display = "🍚 Sugar Block Bag"},
-        {name = "Gelatin", display = "🧪 Gelatin"}
-    }
-    
-    task.spawn(function()
-        local amount = currentBuyAmount
-        
-        for _, item in ipairs(BUY_ITEMS) do
-            if not autoBuyRunning then break end
-            
-            BuyStatusValue.Text = "🛒 Membeli " .. item.display .. " x" .. amount
-            BuyStatusValue.TextColor3 = Color3.fromRGB(255,255,100)
-            
-            for i = 1, amount do
-                if not autoBuyRunning then break end
-                
-                pcall(function()
-                    storePurchaseRE:FireServer(item.name, 1)
-                end)
-                
-                autoBuyTotalBought = autoBuyTotalBought + 1
-                BuyTotalLabel.Text = "Total: " .. autoBuyTotalBought .. " item"
-                task.wait(0.5)
-            end
-            
-            task.wait(0.8)
-        end
-        
-        if autoBuyRunning then
-            BuyStatusValue.Text = "✅ Selesai! Total: " .. autoBuyTotalBought .. " item"
-            BuyStatusValue.TextColor3 = Color3.fromRGB(100,255,100)
-            task.wait(2)
-            if autoBuyRunning then
-                BuyStatusValue.Text = "⏹️ STOPPED"
-                BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
-                autoBuyRunning = false
-            end
-        end
-        updateBuyIndicators()
-    end)
-end
-
-local function stopAutoBuy()
-    autoBuyRunning = false
-    BuyStatusValue.Text = "⏹️ STOPPED"
-    BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
-end
-
--- ========== SLIDER AUTO BUY ==========
-local isDraggingSlider = false
-
-JumlahSliderBg.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDraggingSlider = true
-        local mousePos = input.Position.X
-        local sliderPos = JumlahSliderBg.AbsolutePosition.X
-        local sliderWidth = JumlahSliderBg.AbsoluteSize.X
-        local percent = math.clamp((mousePos - sliderPos) / sliderWidth, 0, 1)
-        local newAmount = math.floor(1 + percent * 49)
-        setBuyAmount(newAmount)
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement and isDraggingSlider then
-        local mousePos = input.Position.X
-        local sliderPos = JumlahSliderBg.AbsolutePosition.X
-        local sliderWidth = JumlahSliderBg.AbsoluteSize.X
-        local mouseInSlider = (mousePos >= sliderPos and mousePos <= sliderPos + sliderWidth)
-        
-        if mouseInSlider then
-            local percent = math.clamp((mousePos - sliderPos) / sliderWidth, 0, 1)
-            local newAmount = math.floor(1 + percent * 49)
-            setBuyAmount(newAmount)
-        end
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDraggingSlider = false
-    end
-end)
-
--- ========== SPEED SLIDER LOGIC ==========
-local isDraggingSpeedSlider = false
-
-local function updateSpeedSlider(percent)
-    local speedValue = math.floor(16 + percent * (1000 - 16))
-    SpeedValueLabel.Text = tostring(speedValue)
-    SpeedSliderFill.Size = UDim2.new(percent, 0, 1, 0)
-    setSpeedValue(speedValue)
-end
-
-SpeedSliderBg.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDraggingSpeedSlider = true
-        local mousePos = input.Position.X
-        local sliderPos = SpeedSliderBg.AbsolutePosition.X
-        local sliderWidth = SpeedSliderBg.AbsoluteSize.X
-        local percent = math.clamp((mousePos - sliderPos) / sliderWidth, 0, 1)
-        updateSpeedSlider(percent)
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement and isDraggingSpeedSlider then
-        local mousePos = input.Position.X
-        local sliderPos = SpeedSliderBg.AbsolutePosition.X
-        local sliderWidth = SpeedSliderBg.AbsoluteSize.X
-        local percent = math.clamp((mousePos - sliderPos) / sliderWidth, 0, 1)
-        updateSpeedSlider(percent)
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDraggingSpeedSlider = false
-    end
-end)
-
-SpeedEnableBtn.MouseButton1Click:Connect(function()
-    enableSpeedUnlimited(tonumber(SpeedValueLabel.Text) or 1000)
-    SpeedStatusValue.Text = "✅ ON (" .. SpeedValueLabel.Text .. ")"
-    SpeedStatusValue.TextColor3 = Color3.fromRGB(100,255,100)
-    SpeedEnableBtn.BackgroundColor3 = Color3.fromRGB(80,180,80)
-end)
-
-SpeedDisableBtn.MouseButton1Click:Connect(function()
-    disableSpeedUnlimited()
-    SpeedStatusValue.Text = "❌ OFF"
-    SpeedStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
-    SpeedEnableBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
-end)
-
--- Set default slider to max
-updateSpeedSlider(1)
-
--- ========== BLINK FUNCTIONS ==========
-local function blinkAtas()
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CFrame = hrp.CFrame * CFrame.new(0, 2, 0)
-        BlinkStatus.Text = "✅ Naik 2 studs!"
-        BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-        task.wait(1)
-        BlinkStatus.Text = "Klik tombol di atas untuk blink"
-        BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-    end
-end
-
-local function blinkDown()
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CFrame = hrp.CFrame * CFrame.new(0, -4, 0)
-        BlinkStatus.Text = "✅ Turun 4 studs!"
-        BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-        task.wait(1)
-        BlinkStatus.Text = "Klik tombol di atas untuk blink"
-        BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-    end
-end
-
-local function blinkMaju()
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
-        BlinkStatus.Text = "✅ Maju 5 studs!"
-        BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-        task.wait(1)
-        BlinkStatus.Text = "Klik tombol di atas untuk blink"
-        BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-    end
-end
-
-local function blinkMundur()
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CFrame = hrp.CFrame - hrp.CFrame.LookVector * 5
-        BlinkStatus.Text = "✅ Mundur 5 studs!"
-        BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-        task.wait(1)
-        BlinkStatus.Text = "Klik tombol di atas untuk blink"
-        BlinkStatus.TextColor3 = Color3.fromRGB(100,255,100)
-    end
-end
-
--- ========== CREATE BLINK BUTTONS ==========
-local function createBlinkButton(parent, name, desc, color, yPos, callback)
-    local btn = Instance.new("TextButton")
-    btn.Parent = parent
-    btn.Size = UDim2.new(1, -16, 0, 55)
-    btn.Position = UDim2.new(0, 8, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(35,35,45)
-    btn.Text = ""
-    btn.BorderSizePixel = 0
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.Parent = btn
-    btnCorner.CornerRadius = UDim.new(0, 8)
-    
-    local icon = Instance.new("TextLabel")
-    icon.Parent = btn
-    icon.Size = UDim2.new(0, 45, 1, 0)
-    icon.Position = UDim2.new(0, 8, 0, 0)
-    icon.BackgroundTransparency = 1
-    icon.Text = name:sub(1, 2)
-    icon.TextSize = 28
-    icon.Font = Enum.Font.GothamBold
-    
-    local title = Instance.new("TextLabel")
-    title.Parent = btn
-    title.Size = UDim2.new(1, -70, 0, 22)
-    title.Position = UDim2.new(0, 55, 0, 8)
-    title.BackgroundTransparency = 1
-    title.Text = name
-    title.TextColor3 = Color3.fromRGB(255,255,255)
-    title.TextXAlignment = Enum.TextXAlignment.Left
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 13
-    
-    local descLabel = Instance.new("TextLabel")
-    descLabel.Parent = btn
-    descLabel.Size = UDim2.new(1, -70, 0, 18)
-    descLabel.Position = UDim2.new(0, 55, 0, 32)
-    descLabel.BackgroundTransparency = 1
-    descLabel.Text = desc
-    descLabel.TextColor3 = Color3.fromRGB(160,160,180)
-    descLabel.TextXAlignment = Enum.TextXAlignment.Left
-    descLabel.Font = Enum.Font.Gotham
-    descLabel.TextSize = 10
-    
-    local actionBtn = Instance.new("TextButton")
-    actionBtn.Parent = btn
-    actionBtn.Size = UDim2.new(0, 40, 0, 32)
-    actionBtn.Position = UDim2.new(1, -48, 0.5, -16)
-    actionBtn.BackgroundColor3 = color
-    actionBtn.Text = "▶️"
-    actionBtn.TextColor3 = Color3.fromRGB(255,255,255)
-    actionBtn.TextSize = 14
-    actionBtn.Font = Enum.Font.GothamBold
-    local actionCorner = Instance.new("UICorner")
-    actionCorner.Parent = actionBtn
-    actionCorner.CornerRadius = UDim.new(0, 6)
-    
-    actionBtn.MouseButton1Click:Connect(callback)
-end
-
-createBlinkButton(MSSafetyContent, "⬆️ BLINK ATAS", "Naik 2 studs", Color3.fromRGB(150,100,200), 40, blinkAtas)
-createBlinkButton(MSSafetyContent, "⬇️ BLINK BAWAH", "Turun 4 studs", Color3.fromRGB(0,150,200), 100, blinkDown)
-createBlinkButton(MSSafetyContent, "➡️ BLINK MAJU", "Maju 5 studs", Color3.fromRGB(0,200,100), 160, blinkMaju)
-createBlinkButton(MSSafetyContent, "⬅️ BLINK MUNDUR", "Mundur 5 studs", Color3.fromRGB(200,100,0), 220, blinkMundur)
-
--- ========== CONNECT BUTTONS ==========
-CloseBtn.MouseButton1Click:Connect(function()
-    if autoSellRunning then stopAutoSell() end
-    if loopRunning then loopRunning = false end
-    if autoBuyRunning then stopAutoBuy() end
-    disableSpeedUnlimited()
-    ScreenGui:Destroy()
-end)
 
 MSLoopStartBtn.MouseButton1Click:Connect(function()
     if not loopRunning then task.spawn(startMSLoop) end
 end)
 MSLoopStopBtn.MouseButton1Click:Connect(function() loopRunning = false end)
-RefreshBtn.MouseButton1Click:Connect(updateBuyIndicators)
 
-BuyStartBtn.MouseButton1Click:Connect(startAutoBuy)
-BuyStopBtn.MouseButton1Click:Connect(stopAutoBuy)
-
-AutoSellStartBtn.MouseButton1Click:Connect(startAutoSell)
-AutoSellStopBtn.MouseButton1Click:Connect(stopAutoSell)
+-- ========== CONNECT BUTTONS ==========
+CloseBtn.MouseButton1Click:Connect(function()
+    if loopRunning then loopRunning = false end
+    disableBypassSpeed()
+    ScreenGui:Destroy()
+end)
 
 -- Tab Switching
 TPTabBtn.MouseButton1Click:Connect(function()
     TPContent.Visible = true
     MSLoopContent.Visible = false
-    AutoBuyContent.Visible = false
     MSSafetyContent.Visible = false
-    AutoSellContent.Visible = false
     
     TPTabBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
     MSLoopTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    AutoBuyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
     MSSafetyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    AutoSellTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
     
     TPTabBtn.TextColor3 = Color3.fromRGB(255,255,255)
     MSLoopTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    AutoBuyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
     MSSafetyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    AutoSellTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
 end)
 
 MSLoopTabBtn.MouseButton1Click:Connect(function()
     TPContent.Visible = false
     MSLoopContent.Visible = true
-    AutoBuyContent.Visible = false
     MSSafetyContent.Visible = false
-    AutoSellContent.Visible = false
     
     TPTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
     MSLoopTabBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
-    AutoBuyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
     MSSafetyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    AutoSellTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
     
     TPTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
     MSLoopTabBtn.TextColor3 = Color3.fromRGB(255,255,255)
-    AutoBuyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
     MSSafetyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    AutoSellTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    updateBuyIndicators()
-end)
-
-AutoBuyTabBtn.MouseButton1Click:Connect(function()
-    TPContent.Visible = false
-    MSLoopContent.Visible = false
-    AutoBuyContent.Visible = true
-    MSSafetyContent.Visible = false
-    AutoSellContent.Visible = false
-    
-    TPTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    MSLoopTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    AutoBuyTabBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
-    MSSafetyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    AutoSellTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    
-    TPTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    MSLoopTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    AutoBuyTabBtn.TextColor3 = Color3.fromRGB(255,255,255)
-    MSSafetyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    AutoSellTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    updateBuyIndicators()
 end)
 
 MSSafetyTabBtn.MouseButton1Click:Connect(function()
     TPContent.Visible = false
     MSLoopContent.Visible = false
-    AutoBuyContent.Visible = false
     MSSafetyContent.Visible = true
-    AutoSellContent.Visible = false
     
     TPTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
     MSLoopTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    AutoBuyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
     MSSafetyTabBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
-    AutoSellTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
     
     TPTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
     MSLoopTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    AutoBuyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
     MSSafetyTabBtn.TextColor3 = Color3.fromRGB(255,255,255)
-    AutoSellTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-end)
-
-AutoSellTabBtn.MouseButton1Click:Connect(function()
-    TPContent.Visible = false
-    MSLoopContent.Visible = false
-    AutoBuyContent.Visible = false
-    MSSafetyContent.Visible = false
-    AutoSellContent.Visible = true
-    
-    TPTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    MSLoopTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    AutoBuyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    MSSafetyTabBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    AutoSellTabBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
-    
-    TPTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    MSLoopTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    AutoBuyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    MSSafetyTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
-    AutoSellTabBtn.TextColor3 = Color3.fromRGB(255,255,255)
-    
-    AutoSellInfo.Text = "Tools: " .. #getSellTools()
 end)
 
 -- Minimize
@@ -1700,9 +823,7 @@ MinBtn.MouseButton1Click:Connect(function()
     if minimized then
         TPContent.Visible = false
         MSLoopContent.Visible = false
-        AutoBuyContent.Visible = false
         MSSafetyContent.Visible = false
-        AutoSellContent.Visible = false
         TabFrame.Visible = false
         MinBtn.Text = "□"
         TweenService:Create(Frame, tweenInfo, {Size = closedSize}):Play()
@@ -1722,9 +843,7 @@ UIS.InputBegan:Connect(function(input, gp)
         if minimized then
             TPContent.Visible = false
             MSLoopContent.Visible = false
-            AutoBuyContent.Visible = false
             MSSafetyContent.Visible = false
-            AutoSellContent.Visible = false
             TabFrame.Visible = false
             MinBtn.Text = "□"
             TweenService:Create(Frame, tweenInfo, {Size = closedSize}):Play()
@@ -1742,21 +861,3 @@ end)
 Frame.Size = UDim2.new(0,0,0,0)
 task.wait(0.1)
 TweenService:Create(Frame, tweenInfo, {Size = openSize}):Play()
-
--- Initial update
-task.wait(1)
-updateBuyIndicators()
-setBuyAmount(10)
-
--- Auto refresh
-task.spawn(function()
-    while true do
-        task.wait(2)
-        if MSLoopContent.Visible or AutoBuyContent.Visible then
-            updateBuyIndicators()
-        end
-        if AutoSellContent.Visible then
-            AutoSellInfo.Text = "Tools: " .. #getSellTools()
-        end
-    end
-end)
